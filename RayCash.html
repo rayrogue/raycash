@@ -1,0 +1,2804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="application-name" content="RayCash">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RayCash">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<title>RayCash - Proyeccion Financiera</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --blue: #5DBFF5;
+    --red: #B80000;
+    --red-light: #ff4444;
+    --yellow: #F2ED6D;
+    --purple: #F08FFF;
+    --green: #499E34;
+    --green-light: #66cc55;
+    --orange: #E89B43;
+    --deep-blue: #374af0;
+    --white: #FFFFFF;
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-card: #1a1a26;
+    --bg-card-hover: #22222e;
+    --bg-input: #14141e;
+    --border: #2a2a3a;
+    --border-light: #3a3a4e;
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888a0;
+    --text-muted: #555570;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(55,74,240,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(240,143,255,0.04) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .app-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding:
+      calc(24px + env(safe-area-inset-top, 0px))
+      calc(20px + env(safe-area-inset-right, 0px))
+      calc(60px + env(safe-area-inset-bottom, 0px))
+      calc(20px + env(safe-area-inset-left, 0px));
+    position: relative; z-index: 1;
+  }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 40px; padding: 32px 0 24px; }
+  .header h1 {
+    font-size: 2.4rem; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 50%, var(--orange) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 6px;
+  }
+  .header .subtitle { color: var(--text-secondary); font-size: 0.9rem; font-weight: 400; }
+  .header .date-badge {
+    display: inline-block; margin-top: 12px; padding: 6px 16px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-secondary);
+  }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; padding-left: 4px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow); transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border-light); }
+
+  /* Setup */
+  .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .setup-grid { grid-template-columns: 1fr; } }
+
+  .field-group label {
+    display: block; font-size: 0.78rem; font-weight: 500;
+    color: var(--text-secondary); margin-bottom: 6px; letter-spacing: 0.3px;
+  }
+  .field-group input, .field-group select {
+    width: 100%; padding: 10px 14px; background: var(--bg-input);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text-primary); font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+  }
+  .field-group input:focus, .field-group select:focus {
+    border-color: var(--deep-blue); box-shadow: 0 0 0 3px rgba(55,74,240,0.15);
+  }
+  .field-group input::placeholder { color: var(--text-muted); }
+
+  .toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+  .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider {
+    position: absolute; inset: 0; background: var(--bg-input);
+    border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: 0.25s;
+  }
+  .toggle .slider::before {
+    content: ''; position: absolute; width: 18px; height: 18px;
+    left: 2px; bottom: 2px; background: var(--text-muted);
+    border-radius: 50%; transition: 0.25s;
+  }
+  .toggle input:checked + .slider { background: var(--deep-blue); border-color: var(--deep-blue); }
+  .toggle input:checked + .slider::before { transform: translateX(20px); background: #fff; }
+  .toggle-label { font-size: 0.82rem; color: var(--text-secondary); }
+
+  /* Thursday banner */
+  .thursday-banner {
+    display: flex; align-items: center; gap: 10px; margin-top: 16px;
+    padding: 10px 16px; background: rgba(93,191,245,0.08);
+    border: 1px solid rgba(93,191,245,0.2); border-radius: var(--radius-sm);
+    font-size: 0.82rem; color: var(--blue);
+  }
+  .thursday-banner .mono { font-weight: 600; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;
+    border: none; border-radius: var(--radius-sm); font-family: 'Inter', sans-serif;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; outline: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--deep-blue), #5b3cf0); color: #fff;
+    box-shadow: 0 2px 12px rgba(55,74,240,0.3);
+  }
+  .btn-primary:hover { box-shadow: 0 4px 20px rgba(55,74,240,0.5); transform: translateY(-1px); }
+  .btn-secondary { background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--border-light); color: var(--text-primary); }
+  .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+  .btn-export {
+    background: rgba(93,191,245,0.1); color: var(--blue); border: 1px solid rgba(93,191,245,0.25);
+  }
+  .btn-export:hover { background: rgba(93,191,245,0.18); border-color: rgba(93,191,245,0.4); }
+
+  .action-bar { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; animation: fadeIn 0.25s ease-out;
+  }
+  .modal-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg); padding: 32px;
+    box-shadow: var(--shadow-lg); max-width: 440px; width: 100%;
+    text-align: center;
+  }
+  .modal-card h2 {
+    font-size: 1.3rem; font-weight: 700; margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  .modal-card p {
+    font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .modal-amount-section {
+    margin-top: 20px; padding-top: 20px;
+    border-top: 1px solid var(--border); text-align: left;
+  }
+  .modal-amount-section .field-group { margin-bottom: 12px; }
+  .modal-amount-section .btn { width: 100%; justify-content: center; }
+
+  /* Events List */
+  .events-list {
+    max-height: 420px; overflow-y: auto; scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .events-list::-webkit-scrollbar { width: 6px; }
+  .events-list::-webkit-scrollbar-track { background: transparent; }
+  .events-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .event-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    border-radius: var(--radius-sm); transition: background 0.15s;
+    border-bottom: 1px solid rgba(42,42,58,0.4);
+  }
+  .event-row:last-child { border-bottom: none; }
+  .event-row:hover { background: var(--bg-card-hover); }
+  .event-row.paid { opacity: 0.4; text-decoration: line-through; }
+  .event-row.is-today { background: rgba(55,74,240,0.08); border-left: 3px solid var(--deep-blue); }
+
+  .event-checkbox { width: 18px; height: 18px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+  .event-index {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    color: var(--text-muted); width: 24px; text-align: right; flex-shrink: 0;
+  }
+  .event-date {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+    color: var(--text-secondary); min-width: 90px; flex-shrink: 0;
+  }
+  .event-name { flex: 1; font-size: 0.85rem; font-weight: 500; }
+  .event-type-badge {
+    font-size: 0.68rem; padding: 2px 8px; border-radius: 10px;
+    font-weight: 500; flex-shrink: 0;
+  }
+  .badge-pago { background: rgba(242,237,109,0.12); color: var(--yellow); }
+  .badge-ingreso { background: rgba(93,191,245,0.12); color: var(--blue); }
+  .badge-vales { background: rgba(232,155,67,0.12); color: var(--orange); }
+
+  .event-amount {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+    font-weight: 600; min-width: 110px; text-align: right; flex-shrink: 0;
+  }
+
+  .amount-payment { color: var(--yellow); }
+  .amount-income { color: var(--blue); }
+  .amount-vales { color: var(--orange); }
+  .amount-positive { color: var(--green); }
+  .amount-negative { color: var(--red-light); }
+  .amount-total { color: var(--purple); }
+
+  /* Extra form */
+  .extra-form {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+    padding: 16px; background: var(--bg-input); border-radius: var(--radius-sm);
+    border: 1px solid var(--border); margin-top: 12px;
+  }
+  .extra-form .field-group { flex: 1; min-width: 120px; }
+  .extra-form .field-group.small { flex: 0 0 130px; }
+  .extra-form .field-group input { font-size: 0.85rem; padding: 8px 10px; }
+
+  /* Recurring payments manager */
+  .recurring-manager {
+    margin-top: 16px; padding: 16px;
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .recurring-manager-title {
+    font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted);
+  }
+  .recurring-manager-note {
+    margin-top: 6px; font-size: 0.78rem; color: var(--text-secondary);
+  }
+  .recurring-list {
+    margin-top: 12px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .recurring-item {
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg-card); padding: 10px 12px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .recurring-item-main { min-width: 0; }
+  .recurring-item-head {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .recurring-item-name {
+    font-size: 0.86rem; font-weight: 600; color: var(--text-primary);
+  }
+  .recurring-item-meta {
+    font-size: 0.75rem; color: var(--text-secondary);
+    margin-top: 3px;
+  }
+  .recurring-item-actions {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
+  }
+  .recurring-empty {
+    font-size: 0.8rem; color: var(--text-muted);
+    padding: 8px 0;
+  }
+  .badge-fixed {
+    font-size: 0.66rem; padding: 2px 8px; border-radius: 10px;
+    background: rgba(136,136,160,0.14); color: var(--text-secondary);
+    font-weight: 600;
+  }
+  .badge-paused {
+    font-size: 0.66rem; padding: 2px 8px; border-radius: 10px;
+    background: rgba(232,155,67,0.14); color: var(--orange);
+    font-weight: 600;
+  }
+  .recurring-form {
+    margin-top: 14px; border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .recurring-form-title {
+    font-size: 0.76rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px;
+  }
+  .recurring-form-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .recurring-form-grid .field-group.full { grid-column: 1 / -1; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 16px; background: var(--bg-input);
+    border-radius: var(--radius-sm); padding: 4px; border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1; padding: 8px 16px; border: none; border-radius: 6px;
+    background: transparent; color: var(--text-muted); font-family: 'Inter', sans-serif;
+    font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--bg-card); color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .tab-btn:hover:not(.active) { color: var(--text-secondary); }
+
+  /* ─── Calendar ─── */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 700px) { .calendar-grid { grid-template-columns: 1fr; } }
+
+  .cal-month {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .cal-month-title {
+    text-align: center; font-weight: 600; font-size: 0.88rem;
+    margin-bottom: 12px; color: var(--text-primary);
+    text-transform: capitalize;
+  }
+  .cal-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px; margin-bottom: 4px;
+  }
+  .cal-weekday {
+    text-align: center; font-size: 0.65rem; font-weight: 600;
+    color: var(--text-muted); padding: 4px 0; text-transform: uppercase;
+  }
+  .cal-days {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+  }
+  .cal-day {
+    position: relative; text-align: center; padding: 6px 2px 10px;
+    border-radius: 6px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted); transition: background 0.15s; min-height: 38px;
+    cursor: default;
+  }
+  .cal-day.in-range { color: var(--text-secondary); }
+  .cal-day.is-today {
+    color: var(--white); font-weight: 700;
+    background: rgba(55,74,240,0.25); border: 1px solid var(--deep-blue);
+  }
+  .cal-day.has-events { cursor: pointer; }
+  .cal-day.has-events:hover { background: var(--bg-card-hover); }
+
+  .cal-dots {
+    display: flex; justify-content: center; gap: 2px;
+    position: absolute; bottom: 2px; left: 0; right: 0;
+  }
+  .cal-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+  }
+  .cal-dot.pago { background: var(--yellow); }
+  .cal-dot.ingreso { background: var(--blue); }
+  .cal-dot.vales { background: var(--orange); }
+  .cal-dot.especial { background: var(--purple); }
+
+  .cal-tooltip {
+    display: none; position: absolute; z-index: 100;
+    background: var(--bg-secondary); border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    box-shadow: var(--shadow-lg); min-width: 200px; max-width: 280px;
+    top: 100%; left: 50%; transform: translateX(-50%);
+    font-size: 0.78rem; line-height: 1.5;
+  }
+  .cal-day:hover .cal-tooltip { display: block; }
+  .cal-tooltip-item { padding: 2px 0; }
+
+  /* ─── Chart ─── */
+  .chart-container {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
+    position: relative;
+  }
+  .chart-title {
+    font-size: 0.88rem; font-weight: 600; margin-bottom: 16px;
+    color: var(--text-primary);
+  }
+  .chart-canvas-wrap {
+    position: relative; width: 100%; height: 320px;
+  }
+  .chart-canvas-wrap canvas {
+    width: 100%; height: 100%; cursor: crosshair;
+  }
+  .chart-tooltip {
+    position: absolute; pointer-events: none; z-index: 50;
+    background: var(--bg-secondary); border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm); padding: 12px 16px;
+    box-shadow: var(--shadow-lg); min-width: 180px;
+    font-size: 0.78rem; line-height: 1.6;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .chart-tooltip.visible { opacity: 1; }
+  .chart-tooltip-title {
+    font-weight: 600; color: var(--text-primary); margin-bottom: 6px;
+    font-size: 0.82rem; border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  }
+  .chart-tooltip-row { display: flex; justify-content: space-between; gap: 16px; }
+  .chart-tooltip-label { color: var(--text-secondary); }
+  .chart-tooltip-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .chart-legend {
+    display: flex; gap: 20px; justify-content: center;
+    margin-top: 16px; flex-wrap: wrap;
+  }
+  .chart-legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.78rem; color: var(--text-secondary);
+  }
+  .chart-legend-dot {
+    width: 10px; height: 10px; border-radius: 3px;
+  }
+
+  /* Projection Weeks */
+  .week-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 16px;
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .week-card.week-danger { border-color: rgba(255,68,68,0.3); }
+  .week-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(55,74,240,0.06), rgba(240,143,255,0.04));
+    border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s;
+  }
+  .week-card.week-danger .week-header {
+    background: linear-gradient(135deg, rgba(255,68,68,0.06), rgba(255,68,68,0.03));
+  }
+  .week-header:hover { background: linear-gradient(135deg, rgba(55,74,240,0.1), rgba(240,143,255,0.06)); }
+  .week-header h3 { font-size: 0.92rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .week-range { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-secondary); font-weight: 400; }
+  .week-balance { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; }
+  .week-alert-badge {
+    font-size: 0.65rem; padding: 2px 8px; border-radius: 10px;
+    background: rgba(255,68,68,0.15); color: var(--red-light);
+    font-weight: 600; white-space: nowrap;
+  }
+  .week-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 8px; margin: 0 -8px; font-size: 0.84rem;
+    border-radius: 6px; transition: background 0.15s;
+    position: relative;
+  }
+  .week-row:hover {
+    background: rgba(55,74,240,0.06);
+  }
+  .week-row:hover .week-row-label { color: var(--text-primary); }
+  .week-row:hover::after {
+    content: ''; position: absolute; left: 8px; right: 8px;
+    bottom: 50%; height: 1px;
+    border-bottom: 1px dashed rgba(136,136,160,0.15);
+    pointer-events: none; z-index: 0;
+  }
+  .week-row-label { color: var(--text-secondary); position: relative; z-index: 1; }
+  .week-row-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 0.88rem; position: relative; z-index: 1; }
+  .week-divider { border: none; border-top: 1px solid rgba(42,42,58,0.5); margin: 8px 0; }
+
+  .payment-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 8px 5px 16px; margin: 0 -8px; font-size: 0.8rem;
+    border-radius: 6px; transition: background 0.15s;
+    position: relative;
+  }
+  .payment-item:hover {
+    background: rgba(55,74,240,0.06);
+  }
+  .payment-item:hover::after {
+    content: ''; position: absolute; left: 16px; right: 8px;
+    bottom: 50%; height: 1px;
+    border-bottom: 1px dashed rgba(136,136,160,0.12);
+    pointer-events: none; z-index: 0;
+  }
+  .payment-item-name {
+    color: var(--text-secondary); display: flex; align-items: center; gap: 6px;
+  }
+  .payment-item-name::before {
+    content: ''; display: inline-block; width: 4px; height: 4px;
+    border-radius: 50%; background: var(--text-muted); flex-shrink: 0;
+  }
+  .payment-item-date { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); margin-left: 4px; }
+  .vales-applied { font-size: 0.72rem; color: var(--orange); margin-left: 6px; }
+
+  .tdc-reserve-note {
+    font-size: 0.72rem; color: var(--text-muted); font-style: italic;
+    padding: 2px 8px 2px 16px; margin-top: -4px;
+  }
+
+  /* Two-column week body */
+  .week-body-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  }
+  .week-body-col {
+    padding: 16px 20px;
+  }
+  .week-body-col.col-summary {
+    border-right: 1px solid var(--border);
+  }
+  .week-col-title {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px;
+    padding-left: 4px;
+  }
+  .detail-section-label {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-muted); margin: 8px 0 4px 4px;
+  }
+  @media (max-width: 700px) {
+    .week-body-grid { grid-template-columns: 1fr; }
+    .week-body-col.col-summary { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* Expense warning badge */
+  .week-expense-warning {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.65rem; padding: 2px 8px; border-radius: 10px;
+    background: rgba(255,68,68,0.15); color: var(--red-light);
+    font-weight: 600; white-space: nowrap;
+  }
+
+  /* Summary */
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
+
+  .summary-card {
+    background: linear-gradient(135deg, var(--bg-card), rgba(55,74,240,0.05));
+    border: 1px solid var(--deep-blue); border-radius: var(--radius-lg);
+    padding: 28px; text-align: center;
+    box-shadow: 0 4px 30px rgba(55,74,240,0.1);
+  }
+  .summary-card.secondary {
+    border-color: var(--border);
+    background: var(--bg-card);
+    box-shadow: var(--shadow);
+  }
+  .summary-label { font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 8px; }
+  .summary-amount { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 800; }
+  .summary-amount.small { font-size: 1.3rem; }
+  .summary-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+
+  /* ─── Health Indicators ─── */
+  .health-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  @media (max-width: 800px) { .health-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .health-grid { grid-template-columns: 1fr; } }
+
+  .health-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; text-align: center;
+    box-shadow: var(--shadow); transition: border-color 0.2s;
+  }
+  .health-card:hover { border-color: var(--border-light); }
+  .health-card-label {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px;
+  }
+  .health-score-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8rem; font-weight: 800; margin-bottom: 6px;
+  }
+  .health-score-label {
+    font-size: 0.75rem; font-weight: 600; padding: 3px 10px;
+    border-radius: 10px; display: inline-block;
+  }
+  .health-meter {
+    width: 100%; height: 6px; background: var(--bg-input);
+    border-radius: 3px; margin-top: 10px; overflow: hidden;
+  }
+  .health-meter-fill {
+    height: 100%; border-radius: 3px; transition: width 0.6s ease-out;
+  }
+  .health-stat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem; font-weight: 700; margin-bottom: 4px;
+  }
+  .health-stat-sub {
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+
+  /* Utilities */
+  .hidden { display: none !important; }
+  .fade-in { animation: fadeIn 0.3s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .text-muted { color: var(--text-muted); }
+  .text-sm { font-size: 0.8rem; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .collapse-arrow { transition: transform 0.2s; color: var(--text-muted); font-size: 0.8rem; }
+  .collapse-arrow.open { transform: rotate(180deg); }
+
+  /* ─── Print Styles ─── */
+  @media print {
+    body {
+      background: #fff !important; color: #111 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body::before { display: none !important; }
+    .modal-overlay { display: none !important; }
+    .btn, .action-bar, .extra-form, .tabs, .event-checkbox,
+    .toggle-row, #setupSection, #eventsSection { display: none !important; }
+    .hidden { display: block !important; }
+    .app-container { max-width: 100%; padding: 10px; }
+    .header h1 {
+      -webkit-text-fill-color: #374af0; background: none;
+      font-size: 1.8rem;
+    }
+    .header .subtitle { color: #555; }
+    .header .date-badge { border-color: #ccc; color: #555; }
+    .section-title { color: #333; }
+    .card, .week-card, .cal-month, .chart-container, .summary-card, .health-card {
+      background: #fff !important; border-color: #ddd !important;
+      box-shadow: none !important; break-inside: avoid;
+    }
+    .week-body-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+    .week-body-grid.hidden { display: grid !important; }
+    .week-body-col.col-summary { border-right: 1px solid #ddd !important; }
+    .week-header { background: #f5f5f5 !important; border-color: #ddd !important; }
+    .week-row-label, .payment-item-name { color: #333 !important; }
+    .amount-payment { color: #b8860b !important; }
+    .amount-income { color: #2980b9 !important; }
+    .amount-positive { color: #27ae60 !important; }
+    .amount-negative { color: #c0392b !important; }
+    .amount-vales { color: #d35400 !important; }
+    .amount-total { color: #8e44ad !important; }
+    .text-muted, .week-range, .event-date, .health-card-label { color: #666 !important; }
+    .chart-canvas-wrap { height: 250px; }
+    .cal-dots {
+      display: flex !important;
+      justify-content: center;
+      gap: 1px;
+      bottom: 1px;
+    }
+    .cal-dot {
+      width: auto !important;
+      height: auto !important;
+      border: none !important;
+      background: none !important;
+      line-height: 1;
+    }
+    .cal-dot::before {
+      content: '•';
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .cal-dot.pago::before { color: #b8860b !important; }
+    .cal-dot.ingreso::before { color: #2980b9 !important; }
+    .cal-dot.vales::before { color: #d35400 !important; }
+    .cal-dot.especial::before { color: #8e44ad !important; }
+    .cal-tooltip { display: none !important; }
+    .summary-card { border-color: #2980b9 !important; }
+    .health-meter { background: #eee !important; }
+  }
+
+  @media (max-width: 640px) {
+    .app-container {
+      padding:
+        calc(16px + env(safe-area-inset-top, 0px))
+        calc(12px + env(safe-area-inset-right, 0px))
+        calc(40px + env(safe-area-inset-bottom, 0px))
+        calc(12px + env(safe-area-inset-left, 0px));
+    }
+    .header h1 { font-size: 1.8rem; }
+    .event-row { gap: 8px; flex-wrap: wrap; }
+    .event-date { min-width: 80px; font-size: 0.72rem; }
+    .event-amount { min-width: 90px; }
+    .extra-form { flex-direction: column; }
+    .extra-form .field-group.small { flex: 1; }
+    .week-header { flex-direction: column; gap: 6px; align-items: flex-start; }
+    .summary-amount { font-size: 1.5rem; }
+    .chart-canvas-wrap { height: 240px; }
+    .modal-card { padding: 24px 20px; }
+    .recurring-item { flex-direction: column; align-items: flex-start; }
+    .recurring-item-actions { width: 100%; justify-content: flex-start; }
+    .recurring-form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Thursday Income Modal -->
+<div class="modal-overlay hidden" id="thursdayModal">
+  <div class="modal-card">
+    <h2>Hoy es jueves de cobro</h2>
+    <p>Es dia de ingreso semanal. Ya recibiste tu pago?</p>
+    <div class="modal-actions" id="thursdayActions">
+      <button class="btn btn-primary" onclick="showThursdayAmountInput()">Si, ya lo recibi</button>
+      <button class="btn btn-secondary" onclick="dismissThursdayModal(false)">No, usar ingreso normal</button>
+    </div>
+    <div class="modal-amount-section hidden" id="thursdayAmountSection">
+      <div class="field-group">
+        <label>Cuanto recibiste? (Se usara como ingreso de la semana 1)</label>
+        <input type="text" id="thursdayAmountInput" placeholder="2,800.00" inputmode="decimal" autocomplete="off">
+      </div>
+      <button class="btn btn-primary" onclick="confirmThursdayAmount()">Confirmar ingreso</button>
+    </div>
+  </div>
+</div>
+
+<div class="app-container">
+  <header class="header">
+    <h1>RayCash</h1>
+    <div class="subtitle">Proyeccion Financiera Personal (MXN)</div>
+    <div class="date-badge" id="currentDate"></div>
+  </header>
+
+  <!-- Setup -->
+  <section class="section" id="setupSection">
+    <div class="section-title">Configuracion Inicial</div>
+    <div class="card">
+      <div class="setup-grid">
+        <div class="field-group">
+          <label for="startingCash">Saldo actual antes de pagos e ingresos de hoy</label>
+          <input type="text" id="startingCash" placeholder="Ej: 1,500.00" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <label for="valesPool">Vales de despensa disponibles</label>
+          <input type="text" id="valesPool" placeholder="0.00" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <label for="weeksAheadInput">Semanas a proyectar</label>
+          <input type="number" id="weeksAheadInput" min="1" max="52" step="1" value="5" inputmode="numeric" autocomplete="off">
+        </div>
+      </div>
+      <div class="toggle-row mt-16">
+        <label class="toggle">
+          <input type="checkbox" id="autoVales" checked>
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Aplicar vales automaticamente a pagos de Coppel</span>
+      </div>
+      <div class="hidden" id="thursdayBanner"></div>
+    </div>
+  </section>
+
+  <!-- Events -->
+  <section class="section" id="eventsSection">
+    <div class="section-title" id="eventsSectionTitle">Eventos de las proximas 5 semanas</div>
+    <div class="card">
+      <div class="events-list" id="eventsList"></div>
+      <div class="mt-16">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="pago" onclick="switchTab(this)">+ Pago</button>
+          <button class="tab-btn" data-tab="ingreso" onclick="switchTab(this)">+ Ingreso</button>
+          <button class="tab-btn" data-tab="vales" onclick="switchTab(this)">+ Vales</button>
+        </div>
+        <div class="extra-form" id="extraForm">
+          <div class="field-group small">
+            <label>Monto ($)</label>
+            <input type="text" id="extraAmount" placeholder="217.50" inputmode="decimal" autocomplete="off">
+          </div>
+          <div class="field-group small">
+            <label>Fecha</label>
+            <input type="date" id="extraDate">
+          </div>
+          <div class="field-group">
+            <label>Descripcion</label>
+            <input type="text" id="extraDesc" placeholder="Ej: Pago a amiga" autocomplete="off">
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="addExtraEvent()" style="margin-bottom:1px;">Agregar</button>
+        </div>
+      </div>
+
+      <div class="recurring-manager">
+        <div class="recurring-manager-title">Pagos recurrentes</div>
+        <div class="recurring-manager-note">Puedes editar fechas/frecuencias, pausar o eliminar pagos recurrentes. Se excluyen Vales y Renta a padres. Los cambios se guardan automaticamente en este navegador.</div>
+
+        <div class="recurring-list" id="recurringList"></div>
+
+        <div class="recurring-form" id="recurringForm">
+          <div class="recurring-form-title" id="recurringFormTitle">Nuevo pago recurrente</div>
+          <div class="recurring-form-grid">
+            <div class="field-group">
+              <label for="recurringName">Nombre</label>
+              <input type="text" id="recurringName" placeholder="Ej: Netflix" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label for="recurringPayee">Acreedor / Categoria</label>
+              <input type="text" id="recurringPayee" placeholder="Ej: Streaming" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label for="recurringAmount">Monto</label>
+              <input type="text" id="recurringAmount" placeholder="149.00" inputmode="decimal" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label for="recurringCurrency">Moneda</label>
+              <select id="recurringCurrency">
+                <option value="MXN">MXN</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="recurringFrequency">Frecuencia</label>
+              <select id="recurringFrequency" onchange="onRecurringFrequencyChange()">
+                <option value="monthly">1 vez al mes</option>
+                <option value="twiceMonthly">2 veces al mes</option>
+                <option value="biweekly">Cada 2 semanas</option>
+                <option value="weekly">Cada semana</option>
+              </select>
+            </div>
+            <div class="field-group" id="recurringDay1Group">
+              <label for="recurringDay1" id="recurringDay1Label">Dia del mes</label>
+              <input type="number" id="recurringDay1" min="1" max="31" step="1" placeholder="15">
+            </div>
+            <div class="field-group hidden" id="recurringDay2Group">
+              <label for="recurringDay2">Segundo dia del mes</label>
+              <input type="number" id="recurringDay2" min="1" max="31" step="1" placeholder="30">
+            </div>
+            <div class="field-group hidden" id="recurringStartDateGroup">
+              <label for="recurringStartDate">Fecha de inicio</label>
+              <input type="date" id="recurringStartDate">
+            </div>
+            <div class="field-group full">
+              <div class="action-bar" style="margin-top:0;">
+                <button class="btn btn-primary" onclick="saveRecurringPayment()" id="saveRecurringBtn">Guardar pago recurrente</button>
+                <button class="btn btn-secondary hidden" onclick="cancelRecurringEdit()" id="cancelRecurringBtn">Cancelar edicion</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="runProjection()">Calcular Proyeccion</button>
+        <button class="btn btn-secondary" onclick="resetAll()">Reiniciar</button>
+        <button class="btn btn-export hidden" id="btnExport" onclick="exportToPDF()">Exportar PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Calendar (hidden until projection) -->
+  <section class="section hidden" id="calendarSection">
+    <div class="section-title">Calendario de Eventos</div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </section>
+
+  <!-- Chart -->
+  <section class="section hidden" id="chartSection">
+    <div class="section-title">Grafica Financiera</div>
+    <div class="chart-container">
+      <div class="chart-title">Flujo semanal: Ingresos vs Egresos</div>
+      <div class="chart-canvas-wrap">
+        <canvas id="finChart"></canvas>
+        <div class="chart-tooltip" id="chartTooltip"></div>
+      </div>
+      <div class="chart-legend">
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--blue)"></span> Ingresos</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--yellow)"></span> Egresos</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--green)"></span> Saldo positivo</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--red-light)"></span> Saldo negativo</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projection -->
+  <section class="section hidden" id="projectionSection">
+    <div class="section-title">Proyeccion Semanal</div>
+    <div id="projectionContainer"></div>
+  </section>
+
+  <!-- Health Indicators -->
+  <section class="section hidden" id="healthSection">
+    <div class="section-title">Salud Financiera</div>
+    <div class="health-grid" id="healthGrid"></div>
+  </section>
+
+  <!-- Summary -->
+  <section class="section hidden" id="summarySection">
+    <div class="section-title">Resumen</div>
+    <div class="summary-grid" id="summaryGrid"></div>
+  </section>
+</div>
+
+<script>
+// ─── Constants ───────────────────────────────────────────────────────────
+const WEEKLY_INCOME = 3200.00;
+const VALES_MONTO = 1407.00;
+const SPOTIFY_MONTO = 239.00;
+const WEEKS_AHEAD = 5;
+const MIN_WEEKS_AHEAD = 1;
+const MAX_WEEKS_AHEAD = 52;
+const MINECRAFT_REALMS_MONTO = 141.00;
+const COPILOT_PRO_USD = 10.00;
+const USD_MXN_FALLBACK = 17.00;
+const USD_MXN_API_URL = 'https://open.er-api.com/v6/latest/USD';
+const RECURRING_PAYMENTS_STORAGE_KEY = 'raycash.recurringPayments.v1';
+
+const DEFAULT_RECURRING_PAYMENTS = [
+  { id: 'bbva-1', name: "BBVA (1)", amount: 577.24, currency: 'MXN', frequency: 'monthly', day1: 1, payee: "BBVA", active: true },
+  { id: 'bbva-16', name: "BBVA (16)", amount: 577.24, currency: 'MXN', frequency: 'monthly', day1: 16, payee: "BBVA", active: true },
+  { id: 'mercado-pago', name: "Mercado Pago", amount: 545.33, currency: 'MXN', frequency: 'monthly', day1: 16, payee: "Mercado Pago", active: true },
+  { id: 'icloud', name: "iCloud+", amount: 179.00, currency: 'MXN', frequency: 'monthly', day1: 8, payee: "Apple", active: true },
+  { id: 'apple-music', name: "Apple Music", amount: 199.00, currency: 'MXN', frequency: 'monthly', day1: 10, payee: "Apple", active: true },
+  { id: 'lentes-coppel', name: "Lentes (Coppel)", amount: 384.00, currency: 'MXN', frequency: 'monthly', day1: 22, payee: "Coppel", active: true },
+  { id: 'sofacama-coppel', name: "Sofacama (Coppel)", amount: 797.00, currency: 'MXN', frequency: 'monthly', day1: 17, payee: "Coppel", active: true },
+  { id: 'microondas-coppel', name: "Microondas (Coppel)", amount: 326.00, currency: 'MXN', frequency: 'monthly', day1: 27, payee: "Coppel", active: true },
+  { id: 'prestamo-coppel', name: "Prestamo Coppel", amount: 2973.00, currency: 'MXN', frequency: 'monthly', day1: 13, payee: "Coppel", active: true },
+  { id: 'minecraft-realms', name: "Minecraft Realms", amount: MINECRAFT_REALMS_MONTO, currency: 'MXN', frequency: 'monthly', day1: 28, payee: "Microsoft", active: true },
+  { id: 'copilot-pro', name: "Copilot Pro", amount: COPILOT_PRO_USD, currency: 'USD', frequency: 'monthly', day1: 28, payee: "Microsoft", active: true },
+  { id: 'renta-padres', name: "Renta a padres", amount: 1771.00, currency: 'MXN', frequency: 'monthly', day1: 1, payee: "Familia", active: true, isProtected: true },
+];
+
+const SPECIAL_THURSDAYS = [
+  new Date(2026, 0, 29),
+  new Date(2026, 1, 12),
+  new Date(2026, 1, 26),
+  new Date(2026, 2, 12),
+];
+
+// ─── State ───────────────────────────────────────────────────────────────
+let allEvents = [];
+let extraEvents = [];
+let currentExtraTab = "pago";
+let customWeek1Income = null; // null = use default WEEKLY_INCOME, number = custom
+let usdToMxnRate = USD_MXN_FALLBACK;
+let recurringPayments = [];
+let editingRecurringId = null;
+let projectionWeeks = WEEKS_AHEAD;
+
+// ─── Date Helpers (using getTime() for robust comparison) ────────────────
+function dateOnly(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function stamp(d) { return dateOnly(d).getTime(); }
+
+function addDays(d, n) {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+function addWeeks(d, n) { return addDays(d, n * 7); }
+
+function formatDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+function formatDateShort(d) {
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+function formatMonthYear(d) {
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function datesEqual(a, b) { return stamp(a) === stamp(b); }
+function dateLTE(a, b) { return stamp(a) <= stamp(b); }
+function dateGTE(a, b) { return stamp(a) >= stamp(b); }
+function dateInRange(d, start, end) { return stamp(d) >= stamp(start) && stamp(d) <= stamp(end); }
+
+function roundToCents(v) {
+  return Math.round(v * 100) / 100;
+}
+
+function sanitizeWeeks(value) {
+  const parsed = parseInt(value, 10);
+  if (!Number.isInteger(parsed)) return WEEKS_AHEAD;
+  return Math.min(MAX_WEEKS_AHEAD, Math.max(MIN_WEEKS_AHEAD, parsed));
+}
+
+function weeksText(weeks) {
+  return `${weeks} semana${weeks === 1 ? '' : 's'}`;
+}
+
+function getProjectionWeeks() {
+  const input = document.getElementById('weeksAheadInput');
+  if (!input) return projectionWeeks;
+  projectionWeeks = sanitizeWeeks(input.value);
+  input.value = projectionWeeks;
+  return projectionWeeks;
+}
+
+function updateProjectionWindowUI() {
+  const weeks = getProjectionWeeks();
+  const today = dateOnly(new Date());
+
+  const title = document.getElementById('eventsSectionTitle');
+  if (title) {
+    title.textContent = `Eventos de las proximas ${weeksText(weeks)}`;
+  }
+
+  const extraDate = document.getElementById('extraDate');
+  if (extraDate) {
+    extraDate.max = formatDate(addWeeks(today, weeks));
+    if (extraDate.value) {
+      const selected = new Date(`${extraDate.value}T00:00:00`);
+      if (!dateInRange(selected, today, addWeeks(today, weeks))) {
+        extraDate.value = formatDate(today);
+      }
+    }
+  }
+}
+
+function onWeeksAheadChange() {
+  updateProjectionWindowUI();
+  buildEventsList();
+  if (window._lastProjection) runProjection();
+}
+
+function generateRecurringId() {
+  return `rec-${Date.now()}-${Math.random().toString(16).slice(2, 9)}`;
+}
+
+function todayIso() {
+  return formatDate(dateOnly(new Date()));
+}
+
+function cloneDefaultRecurringPayments() {
+  return DEFAULT_RECURRING_PAYMENTS.map(p => ({ ...p }));
+}
+
+function normalizeIsoDate(value) {
+  if (!value) return null;
+  const d = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return null;
+  return formatDate(d);
+}
+
+function normalizeRecurringPayment(raw) {
+  const frequency = ['monthly', 'twiceMonthly', 'biweekly', 'weekly'].includes(raw.frequency)
+    ? raw.frequency
+    : 'monthly';
+  const currency = raw.currency === 'USD' ? 'USD' : 'MXN';
+  const amount = roundToCents(Number(raw.amount));
+  const name = String(raw.name || '').trim();
+  const payee = String(raw.payee || raw.name || 'Recurrente').trim();
+
+  if (!name || !Number.isFinite(amount) || amount <= 0) return null;
+
+  let day1 = parseInt(raw.day1 ?? raw.day, 10);
+  if (!Number.isInteger(day1) || day1 < 1 || day1 > 31) day1 = 1;
+
+  let day2 = parseInt(raw.day2, 10);
+  if (!Number.isInteger(day2) || day2 < 1 || day2 > 31) day2 = 15;
+  if (day2 === day1) day2 = day1 === 31 ? 30 : day1 + 1;
+
+  let startDate = normalizeIsoDate(raw.startDate);
+  if ((frequency === 'weekly' || frequency === 'biweekly') && !startDate) {
+    startDate = todayIso();
+  }
+
+  return {
+    id: String(raw.id || generateRecurringId()),
+    name,
+    payee,
+    amount,
+    currency,
+    frequency,
+    day1,
+    day2: frequency === 'twiceMonthly' ? day2 : null,
+    startDate,
+    active: raw.active !== false,
+    isProtected: raw.isProtected === true,
+  };
+}
+
+function saveRecurringPayments() {
+  try {
+    localStorage.setItem(RECURRING_PAYMENTS_STORAGE_KEY, JSON.stringify(recurringPayments));
+  } catch (err) {
+    console.warn('No se pudieron guardar los pagos recurrentes en localStorage.', err);
+  }
+}
+
+function ensureProtectedRecurring() {
+  const protectedDefaults = cloneDefaultRecurringPayments().filter(p => p.isProtected);
+  for (const p of protectedDefaults) {
+    const existingIndex = recurringPayments.findIndex(existing => existing.id === p.id);
+    if (existingIndex === -1) {
+      recurringPayments.push(p);
+    } else {
+      recurringPayments[existingIndex] = { ...p };
+    }
+  }
+}
+
+function loadRecurringPayments() {
+  let parsed = null;
+  try {
+    parsed = JSON.parse(localStorage.getItem(RECURRING_PAYMENTS_STORAGE_KEY) || 'null');
+  } catch (err) {
+    parsed = null;
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    recurringPayments = cloneDefaultRecurringPayments();
+    saveRecurringPayments();
+    return;
+  }
+
+  const seenIds = new Set();
+  recurringPayments = parsed
+    .map(normalizeRecurringPayment)
+    .filter(Boolean)
+    .map(item => {
+      if (seenIds.has(item.id)) item.id = generateRecurringId();
+      seenIds.add(item.id);
+      return item;
+    });
+
+  if (recurringPayments.length === 0) {
+    recurringPayments = cloneDefaultRecurringPayments();
+  }
+
+  ensureProtectedRecurring();
+  saveRecurringPayments();
+}
+
+function getRecurringAmountInMxn(payment) {
+  if (payment.currency === 'USD') {
+    return roundToCents(payment.amount * usdToMxnRate);
+  }
+  return roundToCents(payment.amount);
+}
+
+function getRecurringDisplayName(payment) {
+  if (payment.currency === 'USD') {
+    return `${payment.name} (${payment.amount.toFixed(2)} USD @ ${usdToMxnRate.toFixed(2)} MXN)`;
+  }
+  return payment.name;
+}
+
+async function updateUsdToMxnRate() {
+  try {
+    const res = await fetch(USD_MXN_API_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const nextRate = Number(data && data.rates && data.rates.MXN);
+    if (!Number.isFinite(nextRate) || nextRate <= 0) throw new Error('Tasa MXN invalida');
+
+    const normalizedRate = roundToCents(nextRate);
+    if (Math.abs(normalizedRate - usdToMxnRate) < 0.01) return;
+
+    usdToMxnRate = normalizedRate;
+    buildEventsList();
+    renderRecurringPaymentsList();
+    if (window._lastProjection) runProjection();
+  } catch (err) {
+    console.warn('No se pudo actualizar tipo de cambio USD->MXN. Se mantiene tasa fallback.', err);
+  }
+}
+
+// ─── Financial Logic ─────────────────────────────────────────────────────
+function nthWeekdayOfMonth(year, month, weekday, n) {
+  let count = 0;
+  for (let day = 1; day <= 31; day++) {
+    const d = new Date(year, month, day);
+    if (d.getMonth() !== month) break;
+    if (d.getDay() === weekday) {
+      count++;
+      if (count === n) return d;
+    }
+  }
+  return null;
+}
+
+function thirdFriday(year, month) {
+  return nthWeekdayOfMonth(year, month, 5, 3);
+}
+
+function getSpotifyDates(start, weeksAhead) {
+  const end = addWeeks(start, weeksAhead);
+  const dates = [];
+  for (let offset = -1; offset <= 2; offset++) {
+    let m = start.getMonth() + offset;
+    let y = start.getFullYear();
+    if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
+    const d = new Date(y, m, 18);
+    if (dateInRange(d, start, end)) dates.push(d);
+  }
+  return dates;
+}
+
+function getMonthsInRange(start, end) {
+  const months = [];
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (stamp(cur) <= stamp(end)) {
+    months.push({ year: cur.getFullYear(), month: cur.getMonth() });
+    cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+  }
+  return months;
+}
+
+function buildRecurringEventsForPayment(payment, start, end) {
+  const events = [];
+  if (!payment || payment.active === false) return events;
+
+  const recurringName = getRecurringDisplayName(payment);
+  const recurringAmount = getRecurringAmountInMxn(payment);
+  const recurringPayee = payment.payee || payment.name || 'Recurrente';
+  const recurringStartStamp = payment.startDate
+    ? stamp(new Date(`${payment.startDate}T00:00:00`))
+    : null;
+
+  const pushEvent = (eventDate) => {
+    if (!dateInRange(eventDate, start, end)) return;
+    if (recurringStartStamp !== null && stamp(eventDate) < recurringStartStamp) return;
+    events.push({
+      date: eventDate,
+      name: recurringName,
+      amount: recurringAmount,
+      payee: recurringPayee,
+      type: 'pago',
+      recurringId: payment.id,
+    });
+  };
+
+  if (payment.frequency === 'weekly' || payment.frequency === 'biweekly') {
+    const step = payment.frequency === 'weekly' ? 7 : 14;
+    let cursor = payment.startDate
+      ? new Date(`${payment.startDate}T00:00:00`)
+      : new Date(start);
+
+    if (Number.isNaN(cursor.getTime())) cursor = new Date(start);
+    while (stamp(cursor) < stamp(start)) cursor = addDays(cursor, step);
+    while (dateLTE(cursor, end)) {
+      pushEvent(cursor);
+      cursor = addDays(cursor, step);
+    }
+
+    return events;
+  }
+
+  const months = getMonthsInRange(start, end);
+  const rawDays = payment.frequency === 'twiceMonthly'
+    ? [payment.day1, payment.day2]
+    : [payment.day1];
+  const uniqueDays = [...new Set(rawDays.map(d => parseInt(d, 10)).filter(d => Number.isInteger(d) && d >= 1 && d <= 31))];
+
+  for (const monthInfo of months) {
+    for (const day of uniqueDays) {
+      const lastDay = new Date(monthInfo.year, monthInfo.month + 1, 0).getDate();
+      if (day > lastDay) continue;
+      const eventDate = new Date(monthInfo.year, monthInfo.month, day);
+      pushEvent(eventDate);
+    }
+  }
+
+  return events;
+}
+
+function listUpcomingPayments(start, weeksAhead) {
+  const end = addWeeks(start, weeksAhead);
+  const upcoming = [];
+  const months = getMonthsInRange(start, end);
+
+  for (const payment of recurringPayments) {
+    upcoming.push(...buildRecurringEventsForPayment(payment, start, end));
+  }
+
+  // Spotify income
+  for (const d of getSpotifyDates(start, weeksAhead)) {
+    upcoming.push({ date: d, name: "Spotify (ingreso)", amount: -SPOTIFY_MONTO, payee: "Ingresos", type: 'ingreso' });
+  }
+
+  // Vales (3rd Friday)
+  for (const monthInfo of months) {
+    const y = monthInfo.year;
+    const m = monthInfo.month;
+    let vf;
+    if (y === 2026 && m === 1) {
+      vf = new Date(2026, 1, 27);
+    } else {
+      vf = thirdFriday(y, m);
+    }
+    if (vf && dateInRange(vf, start, end)) {
+      upcoming.push({ date: vf, name: "Vales despensa (3er viernes)", amount: -VALES_MONTO, payee: "Vales", type: 'vales' });
+    }
+  }
+
+  // Special Thursdays
+  for (const d of SPECIAL_THURSDAYS) {
+    if (dateInRange(d, start, end)) {
+      upcoming.push({ date: d, name: "Prestamo $870 BBVA", amount: 217.50, payee: "Especial", type: 'pago' });
+    }
+  }
+
+  upcoming.sort((a, b) => stamp(a.date) - stamp(b.date));
+  return upcoming;
+}
+
+function weekStartingOnThursday(d) {
+  const dow = d.getDay(); // 0=Sun..6=Sat, Thu=4
+  const delta = (dow - 4 + 7) % 7;
+  return addDays(d, -delta);
+}
+
+function isThursday(d) { return d.getDay() === 4; }
+
+function runProjectionCalc(startDate, weeks, startingCash, paidIndices, autoVales, extraEvts, initialValesPool) {
+  // Build merged event list from scratch (same order as allEvents in UI)
+  let events = listUpcomingPayments(startDate, weeks);
+  if (extraEvts && extraEvts.length > 0) {
+    events = events.concat(extraEvts);
+    events.sort((a, b) => stamp(a.date) - stamp(b.date));
+  }
+
+  const week0 = weekStartingOnThursday(startDate);
+  let cash = startingCash;
+  let valesPool = initialValesPool || 0;
+  let eventIndex = 0;
+  const weeksList = [];
+
+  for (let w = 0; w < weeks; w++) {
+    const ws = addDays(week0, w * 7);
+    const we = addDays(ws, 6);
+    let weekIncome = 0;
+
+    // Weekly income
+    const thursdayDate = addDays(ws, 0); // ws IS Thursday (week starts on Thursday)
+    if (dateGTE(thursdayDate, startDate)) {
+      // Week 0: use custom income if set, otherwise default
+      if (w === 0 && customWeek1Income !== null) {
+        weekIncome += customWeek1Income;
+      } else {
+        weekIncome += WEEKLY_INCOME;
+      }
+    }
+
+    const paymentsInWeek = [];
+    let valesInWeek = 0;
+    let spotifyInWeek = 0;
+    let extraIncomeInWeek = [];
+
+    while (eventIndex < events.length) {
+      const ev = events[eventIndex];
+      if (dateInRange(ev.date, ws, we)) {
+        const isPaid = paidIndices.has(eventIndex);
+        if (ev.payee === "Vales") {
+          if (!isPaid) {
+            valesInWeek += Math.abs(ev.amount);
+            valesPool += Math.abs(ev.amount);
+          }
+        } else if (ev.name.startsWith("Spotify") || (ev.payee === "Ingresos" && ev.amount < 0)) {
+          // All income events (Spotify + extra income)
+          if (!isPaid) {
+            extraIncomeInWeek.push({
+              date: ev.date,
+              name: ev.name,
+              amount: Math.abs(ev.amount),
+            });
+          }
+        } else {
+          if (!isPaid) {
+            paymentsInWeek.push({
+              date: ev.date,
+              name: ev.name,
+              payee: ev.payee,
+              amount: ev.amount,
+              originalAmount: ev.amount,
+              appliedVales: 0,
+            });
+          }
+        }
+        eventIndex++;
+      } else {
+        break;
+      }
+    }
+
+    // Apply vales to Coppel
+    if (autoVales && valesPool > 0) {
+      for (const p of paymentsInWeek) {
+        if (p.payee === "Coppel" && valesPool > 0) {
+          const applied = Math.min(valesPool, p.amount);
+          p.amount -= applied;
+          p.appliedVales += applied;
+          valesPool -= applied;
+        }
+      }
+    }
+
+    const totalExtraIncome = extraIncomeInWeek.reduce((s, e) => s + e.amount, 0);
+    const totalPayments = paymentsInWeek.reduce((s, p) => s + p.amount, 0);
+    const netChange = weekIncome + totalExtraIncome - totalPayments;
+    const endCash = cash + netChange;
+
+    weeksList.push({
+      weekStart: ws,
+      weekEnd: we,
+      weekNum: w + 1,
+      income: weekIncome,
+      extraIncome: extraIncomeInWeek,
+      totalExtraIncome: totalExtraIncome,
+      vales: valesInWeek,
+      valesPool: valesPool,
+      payments: paymentsInWeek,
+      totalPayments: totalPayments,
+      startCash: cash,
+      endCash: endCash,
+      extraForCard: Math.max(0, endCash),
+      smartTDC: 0,
+      reserveForFuture: 0,
+    });
+
+    cash = endCash;
+  }
+
+  // ─── Smart TDC: look ahead to avoid future deficits ───
+  // For each week, the max safe TDC amount is the minimum endCash from that
+  // week through the last week (since removing money cascades forward).
+  for (let w = 0; w < weeksList.length; w++) {
+    let minBalance = weeksList[w].endCash;
+    for (let f = w + 1; f < weeksList.length; f++) {
+      minBalance = Math.min(minBalance, weeksList[f].endCash);
+    }
+    weeksList[w].smartTDC = Math.max(0, minBalance);
+    weeksList[w].reserveForFuture = Math.max(0, weeksList[w].endCash - weeksList[w].smartTDC);
+  }
+
+  return weeksList;
+}
+
+// ─── Formatting ──────────────────────────────────────────────────────────
+function formatMoney(n) {
+  return Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDateTimeForFilename(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}-${minutes}-${seconds}`;
+}
+
+function coloredAmount(value, kind) {
+  const cls = kind === 'payment' ? 'amount-payment'
+    : kind === 'income' ? 'amount-income'
+    : kind === 'vales' ? 'amount-vales'
+    : kind === 'total' ? 'amount-total'
+    : value >= 0 ? 'amount-positive' : 'amount-negative';
+  const sign = value >= 0 ? '+' : '-';
+  return `<span class="${cls}">${sign}$${formatMoney(value)}</span>`;
+}
+
+// ─── Thursday Modal ──────────────────────────────────────────────────────
+function showThursdayModal() {
+  document.getElementById('thursdayModal').classList.remove('hidden');
+}
+
+function showThursdayAmountInput() {
+  document.getElementById('thursdayActions').classList.add('hidden');
+  document.getElementById('thursdayAmountSection').classList.remove('hidden');
+  const input = document.getElementById('thursdayAmountInput');
+  input.value = '';
+  input.focus();
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmThursdayAmount();
+  });
+}
+
+function confirmThursdayAmount() {
+  const val = document.getElementById('thursdayAmountInput').value.replace(/,/g, '');
+  const amount = parseFloat(val);
+  if (isNaN(amount) || amount < 0) {
+    alert('Introduce un monto valido.');
+    return;
+  }
+  customWeek1Income = amount;
+  dismissThursdayModal(true);
+}
+
+function dismissThursdayModal(confirmed) {
+  document.getElementById('thursdayModal').classList.add('hidden');
+  // Reset modal state for next time
+  document.getElementById('thursdayActions').classList.remove('hidden');
+  document.getElementById('thursdayAmountSection').classList.add('hidden');
+
+  const banner = document.getElementById('thursdayBanner');
+  if (confirmed && customWeek1Income !== null) {
+    banner.className = 'thursday-banner';
+    banner.innerHTML = `Ingreso de hoy confirmado: <span class="mono">$${formatMoney(customWeek1Income)}</span> (se usara como ingreso de la semana 1)`;
+  } else {
+    customWeek1Income = null;
+    banner.className = 'thursday-banner';
+    banner.innerHTML = `Ingreso semanal: <span class="mono">$${formatMoney(WEEKLY_INCOME)}</span> (monto predeterminado)`;
+  }
+}
+
+// ─── Export to PDF ────────────────────────────────────────────────────────
+function exportToPDF() {
+  const previousTitle = document.title;
+  document.title = `RayCash - ${formatDateTimeForFilename(new Date())}`;
+
+  // Expand all collapsed week bodies before printing
+  document.querySelectorAll('.week-body-grid.hidden').forEach(el => {
+    el.classList.remove('hidden');
+    el.dataset.wasHidden = 'true';
+  });
+  document.querySelectorAll('.collapse-arrow').forEach(el => el.classList.add('open'));
+
+  window.print();
+
+  // Re-collapse after a short delay (print dialog is blocking in most browsers)
+  setTimeout(() => {
+    document.querySelectorAll('.week-body-grid[data-was-hidden]').forEach(el => {
+      el.classList.add('hidden');
+      delete el.dataset.wasHidden;
+    });
+    document.querySelectorAll('.collapse-arrow').forEach((el, i) => {
+      if (i > 0) el.classList.remove('open');
+    });
+    document.title = previousTitle;
+  }, 500);
+}
+
+// ─── Health Score Calculation ─────────────────────────────────────────────
+function computeHealthScore(proj) {
+  const totalIncome = proj.reduce((s, w) => s + w.income + w.totalExtraIncome + w.vales, 0);
+  const totalExpenses = proj.reduce((s, w) => s + w.totalPayments, 0);
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
+  // Risk weeks: weeks where expenses exceed income (not counting starting balance)
+  const riskWeeks = proj.filter(w => w.totalPayments > (w.income + w.totalExtraIncome)).length;
+  const lastBalance = proj[proj.length - 1].endCash;
+  const firstBalance = proj[0].endCash;
+  const trend = lastBalance - firstBalance;
+
+  // Score: 0-100
+  let score = 50;
+  score += Math.min(25, Math.max(-25, savingsRate * 0.5));
+  score -= riskWeeks * 12;
+  score += trend > 0 ? Math.min(15, (trend / 1000) * 15) : Math.max(-15, (trend / 1000) * 15);
+  score += lastBalance > 0 ? 10 : -10;
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  let label, color, bgColor;
+  if (score >= 80) { label = 'Excelente'; color = 'var(--green)'; bgColor = 'rgba(73,158,52,0.15)'; }
+  else if (score >= 60) { label = 'Bueno'; color = 'var(--blue)'; bgColor = 'rgba(93,191,245,0.15)'; }
+  else if (score >= 40) { label = 'Regular'; color = 'var(--orange)'; bgColor = 'rgba(232,155,67,0.15)'; }
+  else { label = 'Critico'; color = 'var(--red-light)'; bgColor = 'rgba(255,68,68,0.15)'; }
+
+  return {
+    score, label, color, bgColor,
+    savingsRate: Math.round(savingsRate * 10) / 10,
+    expenseRatio: totalIncome > 0 ? Math.round((totalExpenses / totalIncome) * 1000) / 10 : 0,
+    riskWeeks,
+    trend: trend >= 0 ? 'up' : 'down',
+    trendAmount: Math.abs(trend),
+    totalIncome,
+    totalExpenses,
+  };
+}
+
+function renderHealthIndicators(proj) {
+  const h = computeHealthScore(proj);
+  const grid = document.getElementById('healthGrid');
+
+  const trendArrow = h.trend === 'up' ? '&#9650;' : '&#9660;';
+  const trendColor = h.trend === 'up' ? 'var(--green)' : 'var(--red-light)';
+
+  grid.innerHTML = `
+    <div class="health-card">
+      <div class="health-card-label">Indice de Salud</div>
+      <div class="health-score-value" style="color:${h.color}">${h.score}</div>
+      <div class="health-score-label" style="background:${h.bgColor};color:${h.color}">${h.label}</div>
+      <div class="health-meter">
+        <div class="health-meter-fill" style="width:${h.score}%;background:${h.color}"></div>
+      </div>
+    </div>
+    <div class="health-card">
+      <div class="health-card-label">Tasa de Ahorro</div>
+      <div class="health-stat" style="color:${h.savingsRate >= 0 ? 'var(--green)' : 'var(--red-light)'}">${h.savingsRate >= 0 ? '+' : ''}${h.savingsRate}%</div>
+      <div class="health-stat-sub">Del ingreso total</div>
+      <div class="health-meter">
+        <div class="health-meter-fill" style="width:${Math.min(100, Math.max(0, h.savingsRate))}%;background:${h.savingsRate >= 20 ? 'var(--green)' : h.savingsRate >= 0 ? 'var(--orange)' : 'var(--red-light)'}"></div>
+      </div>
+    </div>
+    <div class="health-card">
+      <div class="health-card-label">Semanas en Riesgo</div>
+      <div class="health-stat" style="color:${h.riskWeeks === 0 ? 'var(--green)' : 'var(--red-light)'}">${h.riskWeeks} / ${proj.length}</div>
+      <div class="health-stat-sub">${h.riskWeeks === 0 ? 'Gastos no superan ingresos' : h.riskWeeks === 1 ? '1 semana con gastos mayores a ingresos' : h.riskWeeks + ' semanas con gastos mayores a ingresos'}</div>
+    </div>
+    <div class="health-card">
+      <div class="health-card-label">Tendencia</div>
+      <div class="health-stat" style="color:${trendColor}"><span style="font-size:0.8em">${trendArrow}</span> $${formatMoney(h.trendAmount)}</div>
+      <div class="health-stat-sub">${h.trend === 'up' ? 'Saldo mejorando' : 'Saldo deteriorandose'} entre semana 1 y ${proj.length}</div>
+    </div>
+  `;
+}
+
+// ─── Calendar Rendering ──────────────────────────────────────────────────
+function buildCalendar() {
+  const today = dateOnly(new Date());
+  const end = addWeeks(today, getProjectionWeeks());
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  // Build event map: dateKey -> [{name, type}]
+  const eventMap = {};
+  allEvents.forEach(ev => {
+    const key = formatDate(ev.date);
+    if (!eventMap[key]) eventMap[key] = [];
+    const evType = ev.payee === 'Vales' ? 'vales'
+      : ev.payee === 'Especial' ? 'especial'
+      : (ev.amount < 0 || ev.payee === 'Ingresos') ? 'ingreso' : 'pago';
+    eventMap[key].push({ name: ev.name, type: evType, amount: ev.amount });
+  });
+
+  // Determine months to show
+  const monthsToShow = [];
+  let m = new Date(today.getFullYear(), today.getMonth(), 1);
+  while (stamp(m) <= stamp(end)) {
+    monthsToShow.push(new Date(m));
+    m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
+  }
+
+  const dayNames = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
+
+  monthsToShow.forEach(monthStart => {
+    const month = document.createElement('div');
+    month.className = 'cal-month fade-in';
+
+    const title = document.createElement('div');
+    title.className = 'cal-month-title';
+    title.textContent = formatMonthYear(monthStart);
+    month.appendChild(title);
+
+    // Weekday headers
+    const weekdays = document.createElement('div');
+    weekdays.className = 'cal-weekdays';
+    dayNames.forEach(d => {
+      const wd = document.createElement('div');
+      wd.className = 'cal-weekday';
+      wd.textContent = d;
+      weekdays.appendChild(wd);
+    });
+    month.appendChild(weekdays);
+
+    // Day grid
+    const daysContainer = document.createElement('div');
+    daysContainer.className = 'cal-days';
+
+    // First day's weekday (Mon=0 based)
+    const firstDay = new Date(monthStart.getFullYear(), monthStart.getMonth(), 1);
+    let startDow = firstDay.getDay(); // 0=Sun
+    startDow = startDow === 0 ? 6 : startDow - 1; // Convert to Mon=0
+
+    // Empty cells before first day
+    for (let i = 0; i < startDow; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-day';
+      daysContainer.appendChild(empty);
+    }
+
+    const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(monthStart.getFullYear(), monthStart.getMonth(), d);
+      const key = formatDate(date);
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+
+      if (dateInRange(date, today, end)) cell.classList.add('in-range');
+      if (datesEqual(date, today)) cell.classList.add('is-today');
+
+      cell.textContent = d;
+
+      const events = eventMap[key];
+      if (events && events.length > 0) {
+        cell.classList.add('has-events');
+        const dots = document.createElement('div');
+        dots.className = 'cal-dots';
+        // Show up to 4 dots
+        const shown = new Set();
+        events.forEach(ev => {
+          if (shown.size < 4 && !shown.has(ev.type)) {
+            const dot = document.createElement('span');
+            dot.className = `cal-dot ${ev.type}`;
+            dots.appendChild(dot);
+            shown.add(ev.type);
+          }
+        });
+        cell.appendChild(dots);
+
+        // Tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'cal-tooltip';
+        events.forEach(ev => {
+          const item = document.createElement('div');
+          item.className = 'cal-tooltip-item';
+          const color = ev.type === 'vales' ? 'var(--orange)'
+            : ev.type === 'ingreso' ? 'var(--blue)'
+            : ev.type === 'especial' ? 'var(--purple)' : 'var(--yellow)';
+          const sign = ev.amount < 0 ? '+' : '-';
+          item.innerHTML = `<span style="color:${color}">${ev.name}</span> <span class="mono" style="color:${color}">${sign}$${formatMoney(ev.amount)}</span>`;
+          tooltip.appendChild(item);
+        });
+        cell.appendChild(tooltip);
+      }
+
+      daysContainer.appendChild(cell);
+    }
+
+    month.appendChild(daysContainer);
+    grid.appendChild(month);
+  });
+}
+
+// ─── Chart Rendering (interactive hover + animation) ─────────────────────
+let chartState = { hitboxes: [], proj: null, pad: null, dims: null, hoverIdx: -1 };
+let chartAnim = { active: false, startTime: 0, duration: 900, rafId: null };
+
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+function startChartAnimation() {
+  if (chartAnim.rafId) cancelAnimationFrame(chartAnim.rafId);
+  chartAnim.active = true;
+  chartAnim.startTime = performance.now();
+  tickChartAnim();
+}
+
+function tickChartAnim() {
+  const elapsed = performance.now() - chartAnim.startTime;
+  const t = Math.min(elapsed / chartAnim.duration, 1);
+  const barProgress = easeOutCubic(Math.min(t / 0.7, 1));
+  const lineProgress = easeOutCubic(Math.max(0, (t - 0.2) / 0.8));
+  drawChart(-1, barProgress, lineProgress);
+  if (t < 1) {
+    chartAnim.rafId = requestAnimationFrame(tickChartAnim);
+  } else {
+    chartAnim.active = false;
+    chartAnim.rafId = null;
+  }
+}
+
+function renderChart(proj) {
+  const canvas = document.getElementById('finChart');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+
+  const W = rect.width;
+  const H = rect.height;
+  const pad = { top: 30, right: 30, bottom: 50, left: 70 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+
+  // Compute data
+  const incomes = proj.map(w => w.income + w.totalExtraIncome + w.vales);
+  const expenses = proj.map(w => w.totalPayments);
+  const balances = proj.map(w => w.endCash);
+  const maxBar = Math.max(...incomes, ...expenses, 1);
+  const minBal = Math.min(...balances, 0);
+  const maxBal = Math.max(...balances, 0);
+  const balRange = Math.max(maxBal - minBal, 1);
+  const n = proj.length;
+  const groupW = chartW / n;
+  const barW = groupW * 0.3;
+  const gap = groupW * 0.06;
+
+  // Store hitboxes for hover detection
+  const hitboxes = [];
+  for (let i = 0; i < n; i++) {
+    hitboxes.push({
+      x: pad.left + groupW * i,
+      w: groupW,
+      incX: pad.left + groupW * i + groupW * 0.15,
+      expX: pad.left + groupW * i + groupW * 0.15 + barW + gap,
+      barW: barW,
+      incH: (incomes[i] / maxBar) * chartH,
+      expH: (expenses[i] / maxBar) * chartH,
+      incVal: incomes[i],
+      expVal: expenses[i],
+      balVal: balances[i],
+      balX: pad.left + groupW * i + groupW / 2,
+      balY: pad.top + chartH - ((balances[i] - minBal) / balRange) * chartH,
+      weekNum: i + 1,
+      weekLabel: formatDateShort(proj[i].weekStart),
+    });
+  }
+
+  chartState = { hitboxes, proj, pad, dims: { W, H, chartW, chartH, maxBar, minBal, balRange, n, groupW, barW, gap, dpr }, hoverIdx: -1 };
+
+  // Remove old listeners, add new ones
+  canvas.onmousemove = handleChartMouseMove;
+  canvas.onmouseleave = handleChartMouseLeave;
+
+  startChartAnimation();
+}
+
+function drawChart(hoverIdx, barProgress, lineProgress) {
+  if (barProgress === undefined) barProgress = 1;
+  if (lineProgress === undefined) lineProgress = 1;
+  const { hitboxes, pad, dims } = chartState;
+  const { W, H, chartW, chartH, maxBar, n, groupW, barW, gap, dpr } = dims;
+  const canvas = document.getElementById('finChart');
+  const ctx = canvas.getContext('2d');
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(42,42,58,0.6)';
+  ctx.lineWidth = 1;
+  const gridLines = 5;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = pad.top + (chartH / gridLines) * i;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
+    const val = maxBar - (maxBar / gridLines) * i;
+    ctx.fillStyle = '#555570';
+    ctx.font = '11px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText('$' + Math.round(val).toLocaleString(), pad.left - 8, y + 4);
+  }
+
+  const hasHover = hoverIdx >= 0;
+
+  // Hover column highlight
+  if (hasHover) {
+    const hb = hitboxes[hoverIdx];
+    ctx.fillStyle = 'rgba(55,74,240,0.06)';
+    ctx.fillRect(hb.x, pad.top, hb.w, chartH);
+  }
+
+  // Draw bars (with barProgress animation)
+  for (let i = 0; i < n; i++) {
+    const hb = hitboxes[i];
+    const dimmed = hasHover && i !== hoverIdx;
+    const brightAlpha = dimmed ? 0.15 : 0.9;
+    const darkAlpha = dimmed ? 0.08 : 0.3;
+
+    // Per-bar stagger: each bar starts slightly later
+    const stagger = Math.min(1, Math.max(0, (barProgress * (n + 2) - i) / 3));
+    const animIncH = hb.incH * stagger;
+    const animExpH = hb.expH * stagger;
+
+    // Income bar
+    if (animIncH > 0) {
+      const incGrad = ctx.createLinearGradient(0, pad.top + chartH - animIncH, 0, pad.top + chartH);
+      incGrad.addColorStop(0, `rgba(93,191,245,${brightAlpha})`);
+      incGrad.addColorStop(1, `rgba(93,191,245,${darkAlpha})`);
+      ctx.fillStyle = incGrad;
+      roundedRect(ctx, hb.incX, pad.top + chartH - animIncH, barW, animIncH, 4);
+      ctx.fill();
+    }
+
+    // Expense bar
+    if (animExpH > 0) {
+      const expGrad = ctx.createLinearGradient(0, pad.top + chartH - animExpH, 0, pad.top + chartH);
+      expGrad.addColorStop(0, `rgba(242,237,109,${brightAlpha})`);
+      expGrad.addColorStop(1, `rgba(242,237,109,${darkAlpha})`);
+      ctx.fillStyle = expGrad;
+      roundedRect(ctx, hb.expX, pad.top + chartH - animExpH, barW, animExpH, 4);
+      ctx.fill();
+    }
+
+    // Week labels
+    ctx.globalAlpha = dimmed ? 0.3 : stagger;
+    ctx.fillStyle = '#8888a0';
+    ctx.font = '11px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`S${i + 1}`, pad.left + groupW * i + groupW / 2, H - pad.bottom + 18);
+    ctx.fillStyle = '#555570';
+    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.fillText(hb.weekLabel, pad.left + groupW * i + groupW / 2, H - pad.bottom + 32);
+    ctx.globalAlpha = 1;
+  }
+
+  // Balance line (with lineProgress animation — left to right)
+  if (lineProgress > 0 && n > 1) {
+    const pointsToDraw = Math.max(1, Math.floor(lineProgress * n) + (lineProgress >= 1 ? 0 : 1));
+    const fractional = (lineProgress * n) - Math.floor(lineProgress * n);
+    const lastFullIdx = Math.min(Math.floor(lineProgress * n), n - 1);
+
+    ctx.beginPath();
+    ctx.lineWidth = 2.5;
+    for (let i = 0; i <= lastFullIdx && i < n; i++) {
+      const hb = hitboxes[i];
+      if (i === 0) ctx.moveTo(hb.balX, hb.balY);
+      else ctx.lineTo(hb.balX, hb.balY);
+    }
+    // Interpolate to partial next point
+    if (lineProgress < 1 && lastFullIdx < n - 1 && fractional > 0) {
+      const from = hitboxes[lastFullIdx];
+      const to = hitboxes[lastFullIdx + 1];
+      const ix = from.balX + (to.balX - from.balX) * fractional;
+      const iy = from.balY + (to.balY - from.balY) * fractional;
+      ctx.lineTo(ix, iy);
+    }
+    const lastBal = hitboxes[n - 1].balVal;
+    ctx.strokeStyle = lastBal >= 0 ? '#66cc55' : '#ff4444';
+    ctx.stroke();
+
+    // Balance dots + values (only for revealed points)
+    const dotsToShow = lineProgress >= 1 ? n : lastFullIdx + 1;
+    for (let i = 0; i < dotsToShow && i < n; i++) {
+      const hb = hitboxes[i];
+      const dimmed = hasHover && i !== hoverIdx;
+      const dotSize = (hasHover && i === hoverIdx) ? 7 : 5;
+
+      ctx.globalAlpha = dimmed ? 0.25 : 1;
+      ctx.beginPath();
+      ctx.arc(hb.balX, hb.balY, dotSize, 0, Math.PI * 2);
+      ctx.fillStyle = hb.balVal >= 0 ? '#66cc55' : '#ff4444';
+      ctx.fill();
+      ctx.strokeStyle = var_bg_primary;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      const sign = hb.balVal >= 0 ? '+' : '-';
+      ctx.fillStyle = hb.balVal >= 0 ? '#66cc55' : '#ff4444';
+      ctx.font = `bold ${(hasHover && i === hoverIdx) ? 12 : 10}px "JetBrains Mono", monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText(`${sign}$${formatMoney(hb.balVal)}`, hb.balX, hb.balY - 14);
+      ctx.globalAlpha = 1;
+    }
+  } else if (n === 1 && lineProgress > 0) {
+    // Single point
+    const hb = hitboxes[0];
+    ctx.beginPath();
+    ctx.arc(hb.balX, hb.balY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = hb.balVal >= 0 ? '#66cc55' : '#ff4444';
+    ctx.fill();
+    ctx.strokeStyle = var_bg_primary;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    const sign = hb.balVal >= 0 ? '+' : '-';
+    ctx.fillStyle = hb.balVal >= 0 ? '#66cc55' : '#ff4444';
+    ctx.font = 'bold 10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${sign}$${formatMoney(hb.balVal)}`, hb.balX, hb.balY - 14);
+  }
+}
+
+function handleChartMouseMove(e) {
+  if (chartAnim.active) return;
+  const canvas = e.target;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const { hitboxes, pad, dims } = chartState;
+  const { chartH } = dims;
+
+  let found = -1;
+  for (let i = 0; i < hitboxes.length; i++) {
+    const hb = hitboxes[i];
+    if (mx >= hb.x && mx < hb.x + hb.w && my >= pad.top && my <= pad.top + chartH + 40) {
+      found = i;
+      break;
+    }
+  }
+
+  if (found !== chartState.hoverIdx) {
+    chartState.hoverIdx = found;
+    drawChart(found);
+  }
+
+  // Tooltip
+  const tooltip = document.getElementById('chartTooltip');
+  if (found >= 0) {
+    const hb = hitboxes[found];
+    const balSign = hb.balVal >= 0 ? '+' : '-';
+    const balColor = hb.balVal >= 0 ? 'var(--green-light)' : 'var(--red-light)';
+    tooltip.innerHTML = `
+      <div class="chart-tooltip-title">Semana ${hb.weekNum} &mdash; ${hb.weekLabel}</div>
+      <div class="chart-tooltip-row"><span class="chart-tooltip-label">Ingresos</span><span class="chart-tooltip-val" style="color:var(--blue)">+$${formatMoney(hb.incVal)}</span></div>
+      <div class="chart-tooltip-row"><span class="chart-tooltip-label">Egresos</span><span class="chart-tooltip-val" style="color:var(--yellow)">-$${formatMoney(hb.expVal)}</span></div>
+      <div class="chart-tooltip-row"><span class="chart-tooltip-label">Saldo</span><span class="chart-tooltip-val" style="color:${balColor}">${balSign}$${formatMoney(hb.balVal)}</span></div>
+    `;
+    // Position tooltip
+    const wrapRect = canvas.parentElement.getBoundingClientRect();
+    let tx = hb.x + hb.w / 2;
+    let ty = pad.top - 10;
+    // Keep within bounds
+    const tw = 200;
+    if (tx + tw / 2 > wrapRect.width) tx = wrapRect.width - tw / 2 - 8;
+    if (tx - tw / 2 < 0) tx = tw / 2 + 8;
+    tooltip.style.left = tx + 'px';
+    tooltip.style.top = ty + 'px';
+    tooltip.style.transform = 'translateX(-50%)';
+    tooltip.classList.add('visible');
+  } else {
+    tooltip.classList.remove('visible');
+  }
+}
+
+function handleChartMouseLeave() {
+  chartState.hoverIdx = -1;
+  drawChart(-1);
+  document.getElementById('chartTooltip').classList.remove('visible');
+}
+
+const var_bg_primary = '#0a0a0f';
+
+function roundedRect(ctx, x, y, w, h, r) {
+  if (h < r * 2) r = h / 2;
+  if (w < r * 2) r = w / 2;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// ─── UI Rendering ────────────────────────────────────────────────────────
+function init() {
+  const today = dateOnly(new Date());
+  const dayNames = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+  document.getElementById('currentDate').textContent = `${dayNames[today.getDay()]} ${formatDate(today)}`;
+
+  const weeksInput = document.getElementById('weeksAheadInput');
+  weeksInput.min = String(MIN_WEEKS_AHEAD);
+  weeksInput.max = String(MAX_WEEKS_AHEAD);
+  weeksInput.value = String(projectionWeeks);
+
+  document.getElementById('extraDate').value = formatDate(today);
+  document.getElementById('extraDate').min = formatDate(today);
+  updateProjectionWindowUI();
+
+  loadRecurringPayments();
+  buildEventsList();
+  renderRecurringPaymentsList();
+  resetRecurringForm();
+  updateUsdToMxnRate();
+
+  document.getElementById('startingCash').addEventListener('keydown', e => { if (e.key === 'Enter') runProjection(); });
+  document.getElementById('valesPool').addEventListener('keydown', e => { if (e.key === 'Enter') runProjection(); });
+  weeksInput.addEventListener('change', onWeeksAheadChange);
+  weeksInput.addEventListener('blur', onWeeksAheadChange);
+  weeksInput.addEventListener('keydown', e => { if (e.key === 'Enter') onWeeksAheadChange(); });
+
+  window.addEventListener('resize', () => {
+    if (!document.getElementById('chartSection').classList.contains('hidden')) {
+      const proj = window._lastProjection;
+      if (proj) renderChart(proj);
+    }
+  });
+
+  // If today is Thursday, show the income prompt
+  if (isThursday(today)) {
+    showThursdayModal();
+  }
+}
+
+function buildEventsList() {
+  const today = dateOnly(new Date());
+  const weeks = getProjectionWeeks();
+  const visibleExtraEvents = getVisibleExtraEvents(today, weeks);
+  allEvents = listUpcomingPayments(today, weeks);
+
+  if (visibleExtraEvents.length > 0) {
+    allEvents = allEvents.concat(visibleExtraEvents);
+    allEvents.sort((a, b) => stamp(a.date) - stamp(b.date));
+  }
+
+  renderEventsList();
+}
+
+function renderEventsList() {
+  const today = dateOnly(new Date());
+  const container = document.getElementById('eventsList');
+  container.innerHTML = '';
+
+  allEvents.forEach((ev, i) => {
+    const isIncome = ev.payee === "Vales" || ev.payee === "Ingresos" || ev.amount < 0;
+    const typeClass = ev.payee === "Vales" ? 'badge-vales' : isIncome ? 'badge-ingreso' : 'badge-pago';
+    const typeLabel = ev.payee === "Vales" ? 'Vales' : isIncome ? 'Ingreso' : 'Pago';
+    const amountClass = ev.payee === "Vales" ? 'amount-vales' : isIncome ? 'amount-income' : 'amount-payment';
+    const isToday = datesEqual(ev.date, today);
+
+    const row = document.createElement('div');
+    row.className = 'event-row' + (isToday ? ' is-today' : '');
+    row.dataset.index = i;
+
+    row.innerHTML = `
+      <input type="checkbox" class="event-checkbox" data-index="${i}" title="Marcar como pagado/recibido">
+      <span class="event-index">${i}</span>
+      <span class="event-date">${formatDate(ev.date)}${isToday ? ' <span style="color:var(--deep-blue);font-size:0.65rem;">HOY</span>' : ''}</span>
+      <span class="event-name" style="color: ${ev.payee === 'Vales' ? 'var(--orange)' : isIncome ? 'var(--blue)' : 'var(--yellow)'}">${ev.name}</span>
+      <span class="event-type-badge ${typeClass}">${typeLabel}</span>
+      <span class="event-amount ${amountClass}">$${formatMoney(ev.amount)}</span>
+    `;
+
+    const checkbox = row.querySelector('.event-checkbox');
+    checkbox.addEventListener('change', () => {
+      row.classList.toggle('paid', checkbox.checked);
+    });
+
+    container.appendChild(row);
+  });
+}
+
+function getRecurringFrequencyLabel(freq) {
+  if (freq === 'monthly') return '1 vez al mes';
+  if (freq === 'twiceMonthly') return '2 veces al mes';
+  if (freq === 'biweekly') return 'Cada 2 semanas';
+  return 'Cada semana';
+}
+
+function getRecurringScheduleLabel(payment) {
+  if (payment.frequency === 'monthly') return `dia ${payment.day1}`;
+  if (payment.frequency === 'twiceMonthly') return `dias ${payment.day1} y ${payment.day2}`;
+  if (payment.frequency === 'biweekly' || payment.frequency === 'weekly') {
+    const start = payment.startDate || todayIso();
+    return `inicio ${start}`;
+  }
+  return 'sin fecha';
+}
+
+function getNextOccurrenceForRecurring(payment) {
+  const from = dateOnly(new Date());
+  const to = addWeeks(from, 60);
+  const occurrences = buildRecurringEventsForPayment(payment, from, to);
+  return occurrences.length > 0 ? occurrences[0].date : null;
+}
+
+function onRecurringFrequencyChange() {
+  const frequency = document.getElementById('recurringFrequency').value;
+  const day1Group = document.getElementById('recurringDay1Group');
+  const day2Group = document.getElementById('recurringDay2Group');
+  const startDateGroup = document.getElementById('recurringStartDateGroup');
+  const day1Label = document.getElementById('recurringDay1Label');
+
+  day1Group.classList.add('hidden');
+  day2Group.classList.add('hidden');
+  startDateGroup.classList.add('hidden');
+
+  if (frequency === 'monthly') {
+    day1Group.classList.remove('hidden');
+    day1Label.textContent = 'Dia del mes';
+  } else if (frequency === 'twiceMonthly') {
+    day1Group.classList.remove('hidden');
+    day2Group.classList.remove('hidden');
+    day1Label.textContent = 'Primer dia del mes';
+  } else {
+    startDateGroup.classList.remove('hidden');
+  }
+}
+
+function resetRecurringForm() {
+  editingRecurringId = null;
+  document.getElementById('recurringFormTitle').textContent = 'Nuevo pago recurrente';
+  document.getElementById('saveRecurringBtn').textContent = 'Guardar pago recurrente';
+  document.getElementById('cancelRecurringBtn').classList.add('hidden');
+
+  document.getElementById('recurringName').value = '';
+  document.getElementById('recurringPayee').value = '';
+  document.getElementById('recurringAmount').value = '';
+  document.getElementById('recurringCurrency').value = 'MXN';
+  document.getElementById('recurringFrequency').value = 'monthly';
+  document.getElementById('recurringDay1').value = '15';
+  document.getElementById('recurringDay2').value = '30';
+  document.getElementById('recurringStartDate').value = todayIso();
+  onRecurringFrequencyChange();
+}
+
+function editRecurringPayment(id) {
+  const payment = recurringPayments.find(p => p.id === id);
+  if (!payment) return;
+  if (payment.isProtected) {
+    alert('Este pago recurrente es fijo y no se puede editar.');
+    return;
+  }
+
+  editingRecurringId = id;
+  document.getElementById('recurringFormTitle').textContent = `Editar: ${payment.name}`;
+  document.getElementById('saveRecurringBtn').textContent = 'Guardar cambios';
+  document.getElementById('cancelRecurringBtn').classList.remove('hidden');
+
+  document.getElementById('recurringName').value = payment.name;
+  document.getElementById('recurringPayee').value = payment.payee || '';
+  document.getElementById('recurringAmount').value = payment.amount;
+  document.getElementById('recurringCurrency').value = payment.currency || 'MXN';
+  document.getElementById('recurringFrequency').value = payment.frequency || 'monthly';
+  document.getElementById('recurringDay1').value = payment.day1 || 1;
+  document.getElementById('recurringDay2').value = payment.day2 || 15;
+  document.getElementById('recurringStartDate').value = payment.startDate || todayIso();
+
+  onRecurringFrequencyChange();
+  document.getElementById('recurringForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cancelRecurringEdit() {
+  resetRecurringForm();
+}
+
+function applyRecurringChanges() {
+  saveRecurringPayments();
+  renderRecurringPaymentsList();
+  buildEventsList();
+  if (window._lastProjection) runProjection();
+}
+
+function saveRecurringPayment() {
+  const name = document.getElementById('recurringName').value.trim();
+  const payee = document.getElementById('recurringPayee').value.trim() || name;
+  const amount = parseFloat(document.getElementById('recurringAmount').value.replace(/,/g, ''));
+  const currency = document.getElementById('recurringCurrency').value === 'USD' ? 'USD' : 'MXN';
+  const frequency = document.getElementById('recurringFrequency').value;
+
+  if (!name) {
+    alert('Escribe un nombre para el pago recurrente.');
+    return;
+  }
+  if (!Number.isFinite(amount) || amount <= 0) {
+    alert('Introduce un monto valido mayor a 0.');
+    return;
+  }
+
+  const existing = editingRecurringId ? recurringPayments.find(p => p.id === editingRecurringId) : null;
+  if (existing && existing.isProtected) {
+    alert('Este pago recurrente es fijo y no se puede editar.');
+    return;
+  }
+
+  const basePayload = {
+    id: existing ? existing.id : generateRecurringId(),
+    name,
+    payee,
+    amount: roundToCents(amount),
+    currency,
+    frequency,
+    active: existing ? existing.active !== false : true,
+    isProtected: existing ? existing.isProtected === true : false,
+  };
+
+  if (frequency === 'monthly' || frequency === 'twiceMonthly') {
+    const day1 = parseInt(document.getElementById('recurringDay1').value, 10);
+    if (!Number.isInteger(day1) || day1 < 1 || day1 > 31) {
+      alert('El dia del mes debe estar entre 1 y 31.');
+      return;
+    }
+    basePayload.day1 = day1;
+    basePayload.startDate = null;
+
+    if (frequency === 'twiceMonthly') {
+      const day2 = parseInt(document.getElementById('recurringDay2').value, 10);
+      if (!Number.isInteger(day2) || day2 < 1 || day2 > 31) {
+        alert('El segundo dia del mes debe estar entre 1 y 31.');
+        return;
+      }
+      if (day1 === day2) {
+        alert('Para frecuencia de 2 veces al mes, los dos dias deben ser distintos.');
+        return;
+      }
+      basePayload.day2 = day2;
+    }
+  } else {
+    const startDate = normalizeIsoDate(document.getElementById('recurringStartDate').value);
+    if (!startDate) {
+      alert('Selecciona una fecha de inicio valida.');
+      return;
+    }
+    basePayload.startDate = startDate;
+    basePayload.day1 = null;
+    basePayload.day2 = null;
+  }
+
+  const normalized = normalizeRecurringPayment(basePayload);
+  if (!normalized) {
+    alert('No se pudo guardar el pago recurrente. Revisa los datos.');
+    return;
+  }
+
+  if (editingRecurringId) {
+    recurringPayments = recurringPayments.map(p => p.id === editingRecurringId ? normalized : p);
+  } else {
+    recurringPayments.push(normalized);
+  }
+
+  applyRecurringChanges();
+  resetRecurringForm();
+}
+
+function removeRecurringPayment(id) {
+  const payment = recurringPayments.find(p => p.id === id);
+  if (!payment) return;
+  if (payment.isProtected) {
+    alert('Este pago recurrente es fijo y no se puede eliminar.');
+    return;
+  }
+
+  if (!confirm(`Eliminar "${payment.name}" de pagos recurrentes?`)) return;
+
+  recurringPayments = recurringPayments.filter(p => p.id !== id);
+  if (editingRecurringId === id) resetRecurringForm();
+  applyRecurringChanges();
+}
+
+function toggleRecurringActive(id) {
+  recurringPayments = recurringPayments.map(p => {
+    if (p.id !== id) return p;
+    if (p.isProtected) return p;
+    return { ...p, active: !(p.active !== false) };
+  });
+  applyRecurringChanges();
+}
+
+function renderRecurringPaymentsList() {
+  const list = document.getElementById('recurringList');
+  if (!list) return;
+
+  list.innerHTML = '';
+  if (recurringPayments.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'recurring-empty';
+    empty.textContent = 'No hay pagos recurrentes registrados.';
+    list.appendChild(empty);
+    return;
+  }
+
+  recurringPayments.forEach(payment => {
+    const row = document.createElement('div');
+    row.className = 'recurring-item';
+    if (payment.active === false) row.style.opacity = '0.75';
+
+    const main = document.createElement('div');
+    main.className = 'recurring-item-main';
+
+    const head = document.createElement('div');
+    head.className = 'recurring-item-head';
+
+    const name = document.createElement('div');
+    name.className = 'recurring-item-name';
+    name.textContent = payment.name;
+    head.appendChild(name);
+
+    if (payment.isProtected) {
+      const fixed = document.createElement('span');
+      fixed.className = 'badge-fixed';
+      fixed.textContent = 'Fijo';
+      head.appendChild(fixed);
+    } else if (payment.active === false) {
+      const paused = document.createElement('span');
+      paused.className = 'badge-paused';
+      paused.textContent = 'Pausado';
+      head.appendChild(paused);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'recurring-item-meta';
+    const amountText = payment.currency === 'USD'
+      ? `$${formatMoney(payment.amount)} USD (~$${formatMoney(getRecurringAmountInMxn(payment))} MXN)`
+      : `$${formatMoney(payment.amount)} MXN`;
+    const nextDate = payment.active === false ? null : getNextOccurrenceForRecurring(payment);
+    const nextText = payment.active === false
+      ? 'Pausado'
+      : (nextDate ? `Proximo: ${formatDate(nextDate)}` : 'Sin proxima fecha en rango');
+    meta.textContent = `${getRecurringFrequencyLabel(payment.frequency)} (${getRecurringScheduleLabel(payment)}) • ${amountText} • ${nextText}`;
+
+    main.appendChild(head);
+    main.appendChild(meta);
+
+    const actions = document.createElement('div');
+    actions.className = 'recurring-item-actions';
+
+    if (!payment.isProtected) {
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-secondary btn-sm';
+      editBtn.textContent = 'Editar';
+      editBtn.onclick = () => editRecurringPayment(payment.id);
+
+      const pauseBtn = document.createElement('button');
+      pauseBtn.className = 'btn btn-secondary btn-sm';
+      pauseBtn.textContent = payment.active === false ? 'Activar' : 'Pausar';
+      pauseBtn.onclick = () => toggleRecurringActive(payment.id);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'btn btn-secondary btn-sm';
+      removeBtn.textContent = 'Eliminar';
+      removeBtn.onclick = () => removeRecurringPayment(payment.id);
+
+      actions.appendChild(editBtn);
+      actions.appendChild(pauseBtn);
+      actions.appendChild(removeBtn);
+    }
+
+    row.appendChild(main);
+    row.appendChild(actions);
+    list.appendChild(row);
+  });
+}
+
+function switchTab(btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentExtraTab = btn.dataset.tab;
+
+  const descInput = document.getElementById('extraDesc');
+  if (currentExtraTab === 'pago') descInput.placeholder = 'Ej: Pago a amiga';
+  else if (currentExtraTab === 'ingreso') descInput.placeholder = 'Ej: Bono, Freelance';
+  else descInput.placeholder = 'Ej: Vales extra';
+}
+
+function addExtraEvent() {
+  const amountStr = document.getElementById('extraAmount').value.replace(/,/g, '');
+  const dateStr = document.getElementById('extraDate').value;
+  const desc = document.getElementById('extraDesc').value.trim();
+
+  const amount = parseFloat(amountStr);
+  if (isNaN(amount) || amount <= 0) { alert('Introduce un monto valido.'); return; }
+  if (!dateStr) { alert('Selecciona una fecha.'); return; }
+
+  const d = new Date(dateStr + 'T00:00:00');
+  const today = dateOnly(new Date());
+  const weeks = getProjectionWeeks();
+  const end = addWeeks(today, weeks);
+
+  if (!dateInRange(d, today, end)) {
+    alert(`La fecha debe estar dentro de las proximas ${weeksText(weeks)} (incluyendo hoy).`);
+    return;
+  }
+
+  let ev;
+  if (currentExtraTab === 'pago') {
+    ev = { date: d, name: desc || 'Pago adicional', amount: amount, payee: 'Extra', type: 'pago' };
+  } else if (currentExtraTab === 'ingreso') {
+    ev = { date: d, name: desc || 'Ingreso adicional', amount: -amount, payee: 'Ingresos', type: 'ingreso' };
+  } else {
+    ev = { date: d, name: desc || 'Vales adicionales', amount: -amount, payee: 'Vales', type: 'vales' };
+  }
+
+  extraEvents.push(ev);
+  buildEventsList();
+
+  document.getElementById('extraAmount').value = '';
+  document.getElementById('extraDesc').value = '';
+}
+
+function parseAmount(str) {
+  return parseFloat((str || '0').replace(/,/g, '')) || 0;
+}
+
+function getVisibleExtraEvents(startDate, weeks) {
+  const end = addWeeks(startDate, weeks);
+  return extraEvents.filter(ev => dateInRange(ev.date, startDate, end));
+}
+
+function runProjection() {
+  const startingCash = parseAmount(document.getElementById('startingCash').value);
+  const initialValesPool = parseAmount(document.getElementById('valesPool').value);
+  const autoVales = document.getElementById('autoVales').checked;
+  const today = dateOnly(new Date());
+  const weeks = getProjectionWeeks();
+  const visibleExtraEvents = getVisibleExtraEvents(today, weeks);
+
+  // Gather paid indices - these map to allEvents which has the same build logic as inside runProjectionCalc
+  const paidIndices = new Set();
+  document.querySelectorAll('.event-checkbox:checked').forEach(cb => {
+    paidIndices.add(parseInt(cb.dataset.index));
+  });
+
+  const proj = runProjectionCalc(today, weeks, startingCash, paidIndices, autoVales, visibleExtraEvents, initialValesPool);
+  window._lastProjection = proj;
+
+  // Unhide sections FIRST so canvas has real dimensions
+  document.getElementById('calendarSection').classList.remove('hidden');
+  document.getElementById('chartSection').classList.remove('hidden');
+  document.getElementById('projectionSection').classList.remove('hidden');
+  document.getElementById('healthSection').classList.remove('hidden');
+  document.getElementById('summarySection').classList.remove('hidden');
+  document.getElementById('btnExport').classList.remove('hidden');
+
+  renderProjection(proj);
+  renderHealthIndicators(proj);
+  renderSummary(proj);
+  buildCalendar();
+
+  // Render chart after layout reflow so canvas dimensions are correct
+  requestAnimationFrame(() => {
+    renderChart(proj);
+  });
+
+  document.getElementById('calendarSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderProjection(proj) {
+  const container = document.getElementById('projectionContainer');
+  container.innerHTML = '';
+
+  proj.forEach((w, i) => {
+    const card = document.createElement('div');
+    card.className = 'week-card fade-in';
+    if (w.endCash < 0) card.classList.add('week-danger');
+    card.style.animationDelay = `${i * 0.06}s`;
+
+    const balColor = w.endCash >= 0 ? 'amount-positive' : 'amount-negative';
+    const isFirst = i === 0;
+
+    // Total income for the week
+    const totalIncome = w.income + w.totalExtraIncome;
+
+    // Alert badges
+    const alertBadge = w.endCash < 0
+      ? `<span class="week-alert-badge">Saldo negativo</span>`
+      : '';
+    const expenseWarning = w.totalPayments > totalIncome
+      ? `<span class="week-expense-warning">&#9888; Gastos superan ingresos</span>`
+      : '';
+
+    // ─── RIGHT COLUMN: Details ───
+
+    // Income detail items
+    let incomeDetailHTML = '';
+    incomeDetailHTML += `
+      <div class="payment-item">
+        <span class="payment-item-name" style="color:var(--blue)">Ingreso semanal (jueves)</span>
+        <span class="week-row-value amount-income">+$${formatMoney(w.income)}</span>
+      </div>`;
+    if (w.extraIncome.length > 0) {
+      w.extraIncome.forEach(inc => {
+        incomeDetailHTML += `
+          <div class="payment-item">
+            <span class="payment-item-name" style="color:var(--blue)">${inc.name} <span class="payment-item-date">${formatDateShort(inc.date)}</span></span>
+            <span class="week-row-value amount-income">+$${formatMoney(inc.amount)}</span>
+          </div>`;
+      });
+    }
+
+    // Payment detail items
+    let paymentsDetailHTML = '';
+    if (w.payments.length > 0) {
+      w.payments.forEach(p => {
+        const valesNote = p.appliedVales > 0
+          ? `<span class="vales-applied">(vales: $${formatMoney(p.appliedVales)})</span>`
+          : '';
+        paymentsDetailHTML += `
+          <div class="payment-item">
+            <span class="payment-item-name">${p.name} <span class="payment-item-date">${formatDateShort(p.date)}</span> ${valesNote}</span>
+            <span class="week-row-value amount-payment">-$${formatMoney(p.amount)}</span>
+          </div>`;
+      });
+    }
+
+    // Smart TDC display
+    let tdcHTML = '';
+    if (w.smartTDC > 0) {
+      const tdcPct = w.endCash > 0 ? Math.round((w.smartTDC / w.endCash) * 1000) / 10 : 0;
+      tdcHTML = `
+        <hr class="week-divider">
+        <div class="week-row">
+          <span class="week-row-label text-muted text-sm">Potencial para TDC <span style="color:var(--deep-blue)">(${tdcPct}%)</span></span>
+          <span class="week-row-value text-sm" style="color: var(--deep-blue)">$${formatMoney(w.smartTDC)}</span>
+        </div>`;
+      if (w.reserveForFuture > 0) {
+        const reservePct = w.endCash > 0 ? Math.round((w.reserveForFuture / w.endCash) * 1000) / 10 : 0;
+        tdcHTML += `<div class="tdc-reserve-note">Reserva $${formatMoney(w.reserveForFuture)} (${reservePct}%) para cubrir gastos de semanas futuras</div>`;
+      }
+    } else if (w.endCash > 0 && w.reserveForFuture > 0) {
+      tdcHTML = `
+        <hr class="week-divider">
+        <div class="week-row">
+          <span class="week-row-label text-muted text-sm">Potencial para TDC <span style="color:var(--text-muted)">(0%)</span></span>
+          <span class="week-row-value text-sm" style="color: var(--text-muted)">$0.00</span>
+        </div>
+        <div class="tdc-reserve-note">Los $${formatMoney(w.endCash)} (100%) se reservan para cubrir gastos de semanas futuras</div>`;
+    }
+
+    card.innerHTML = `
+      <div class="week-header" onclick="this.parentElement.querySelector('.week-body-grid').classList.toggle('hidden'); this.querySelector('.collapse-arrow').classList.toggle('open');">
+        <h3>
+          Semana ${w.weekNum}
+          <span class="week-range">${formatDateShort(w.weekStart)} - ${formatDateShort(w.weekEnd)}</span>
+          ${alertBadge}
+          ${expenseWarning}
+          <span class="collapse-arrow ${isFirst ? 'open' : ''}">&#9660;</span>
+        </h3>
+        <span class="week-balance ${balColor}">${w.endCash >= 0 ? '+' : '-'}$${formatMoney(w.endCash)}</span>
+      </div>
+      <div class="week-body-grid ${isFirst ? '' : 'hidden'}">
+        <div class="week-body-col col-summary">
+          <div class="week-col-title">Resumen</div>
+          <div class="week-row">
+            <span class="week-row-label">Saldo inicial</span>
+            <span class="week-row-value">${coloredAmount(w.startCash)}</span>
+          </div>
+          <div class="week-row">
+            <span class="week-row-label">Ingresos totales</span>
+            <span class="week-row-value amount-income">+$${formatMoney(totalIncome)}</span>
+          </div>
+          ${w.vales > 0 ? `<div class="week-row">
+            <span class="week-row-label">Vales recibidos</span>
+            <span class="week-row-value amount-vales">+$${formatMoney(w.vales)}</span>
+          </div>` : ''}
+          <div class="week-row">
+            <span class="week-row-label">Pagos totales</span>
+            <span class="week-row-value amount-total">-$${formatMoney(w.totalPayments)}</span>
+          </div>
+          ${w.valesPool > 0 ? `<div class="week-row">
+            <span class="week-row-label">Vales en pool</span>
+            <span class="week-row-value amount-vales">$${formatMoney(w.valesPool)}</span>
+          </div>` : ''}
+          <hr class="week-divider">
+          <div class="week-row">
+            <span class="week-row-label"><strong>Saldo final estimado</strong></span>
+            <span class="week-row-value ${balColor}"><strong>${w.endCash >= 0 ? '+' : '-'}$${formatMoney(w.endCash)}</strong></span>
+          </div>
+        </div>
+        <div class="week-body-col col-details">
+          <div class="week-col-title">Detalle</div>
+          <div class="detail-section-label" style="color:var(--blue)">Ingresos</div>
+          ${incomeDetailHTML}
+          ${paymentsDetailHTML ? `
+            <hr class="week-divider">
+            <div class="detail-section-label" style="color:var(--yellow)">Pagos</div>
+            ${paymentsDetailHTML}
+          ` : ''}
+          ${tdcHTML}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+function renderSummary(proj) {
+  const grid = document.getElementById('summaryGrid');
+  const last = proj[proj.length - 1];
+  const weeksCount = proj.length;
+  const totalIncome = proj.reduce((s, w) => s + w.income + w.totalExtraIncome + w.vales, 0);
+  const totalExpenses = proj.reduce((s, w) => s + w.totalPayments, 0);
+  const summaryColor = last.endCash >= 0 ? 'amount-positive' : 'amount-negative';
+  const totalSmartTDC = proj.reduce((s, w) => s + w.smartTDC, 0);
+
+  grid.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-label">Saldo final estimado &mdash; Semana ${weeksCount}</div>
+      <div class="summary-amount ${summaryColor}">${last.endCash >= 0 ? '+' : '-'}$${formatMoney(last.endCash)}</div>
+      <div class="summary-note">
+        Los vales aparecen por separado y solo se aplican a Coppel si esta activado.<br>
+        La TDC inteligente reserva fondos para cubrir semanas futuras con deficit.
+      </div>
+    </div>
+    <div class="summary-card secondary">
+      <div style="display:grid;gap:16px;">
+        <div>
+          <div class="summary-label">Total ingresos (${weeksText(weeksCount)})</div>
+          <div class="summary-amount small amount-income">+$${formatMoney(totalIncome)}</div>
+        </div>
+        <div>
+          <div class="summary-label">Total egresos (${weeksText(weeksCount)})</div>
+          <div class="summary-amount small amount-payment">-$${formatMoney(totalExpenses)}</div>
+        </div>
+        <div>
+          <div class="summary-label">Flujo neto</div>
+          <div class="summary-amount small ${totalIncome - totalExpenses >= 0 ? 'amount-positive' : 'amount-negative'}">${totalIncome - totalExpenses >= 0 ? '+' : '-'}$${formatMoney(totalIncome - totalExpenses)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function resetAll() {
+  extraEvents = [];
+  customWeek1Income = null;
+  resetRecurringForm();
+  document.getElementById('startingCash').value = '';
+  document.getElementById('valesPool').value = '';
+  document.getElementById('autoVales').checked = true;
+  document.getElementById('calendarSection').classList.add('hidden');
+  document.getElementById('chartSection').classList.add('hidden');
+  document.getElementById('projectionSection').classList.add('hidden');
+  document.getElementById('healthSection').classList.add('hidden');
+  document.getElementById('summarySection').classList.add('hidden');
+  document.getElementById('btnExport').classList.add('hidden');
+  document.getElementById('projectionContainer').innerHTML = '';
+  document.getElementById('thursdayBanner').className = 'hidden';
+  window._lastProjection = null;
+  buildEventsList();
+  renderRecurringPaymentsList();
+
+  // Re-show Thursday modal if applicable
+  const today = dateOnly(new Date());
+  if (isThursday(today)) {
+    showThursdayModal();
+  }
+}
+
+const PWA_LOG_PREFIX = '[RayCash PWA]';
+let hasReloadedForServiceWorker = false;
+
+function logPwaInfo(message, detail) {
+  if (detail === undefined) {
+    console.info(PWA_LOG_PREFIX, message);
+    return;
+  }
+  console.info(PWA_LOG_PREFIX, message, detail);
+}
+
+function logPwaWarn(message, detail) {
+  if (detail === undefined) {
+    console.warn(PWA_LOG_PREFIX, message);
+    return;
+  }
+  console.warn(PWA_LOG_PREFIX, message, detail);
+}
+
+function activateWaitingServiceWorker(worker) {
+  if (!worker) return;
+  logPwaInfo('Nueva version detectada. Activando service worker actualizado.');
+  worker.postMessage({ type: 'SKIP_WAITING' });
+}
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) {
+    logPwaWarn('Este navegador no soporta service workers.');
+    return;
+  }
+
+  const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+  if (window.location.protocol !== 'https:' && !isLocalhost) {
+    logPwaWarn('El service worker requiere HTTPS o localhost.');
+    return;
+  }
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hasReloadedForServiceWorker) return;
+    hasReloadedForServiceWorker = true;
+    logPwaInfo('Nueva version activa. Recargando la app.');
+    window.location.reload();
+  });
+
+  try {
+    const registration = await navigator.serviceWorker.register('./sw.js');
+    logPwaInfo('Service worker registrado.', registration.scope);
+
+    if (registration.waiting) {
+      activateWaitingServiceWorker(registration.waiting);
+    }
+
+    registration.addEventListener('updatefound', () => {
+      const installingWorker = registration.installing;
+      if (!installingWorker) return;
+
+      logPwaInfo('Buscando actualizacion del service worker.');
+      installingWorker.addEventListener('statechange', () => {
+        logPwaInfo('Estado del service worker:', installingWorker.state);
+        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          activateWaitingServiceWorker(installingWorker);
+        }
+      });
+    });
+  } catch (error) {
+    logPwaWarn('No se pudo registrar el service worker.', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  registerServiceWorker();
+});
+</script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'raycash-static-v1';
+const CACHE_VERSION = 'raycash-static-v4';
 const APP_SHELL = [
   './',
   './index.html',

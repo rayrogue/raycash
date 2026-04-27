@@ -629,6 +629,114 @@
   .collapse-arrow { transition: transform 0.2s; color: var(--text-muted); font-size: 0.8rem; }
   .collapse-arrow.open { transform: rotate(180deg); }
 
+  /* App Lock */
+  body.lock-screen-active {
+    overflow: hidden;
+  }
+  .app-container.is-obscured {
+    filter: blur(18px);
+    opacity: 0.32;
+    pointer-events: none;
+    user-select: none;
+  }
+  .lock-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding:
+      calc(24px + env(safe-area-inset-top, 0px))
+      calc(20px + env(safe-area-inset-right, 0px))
+      calc(24px + env(safe-area-inset-bottom, 0px))
+      calc(20px + env(safe-area-inset-left, 0px));
+    background: rgba(7, 7, 12, 0.86);
+    backdrop-filter: blur(16px);
+  }
+  .lock-screen.hidden {
+    display: none !important;
+  }
+  .lock-card {
+    width: min(100%, 420px);
+    background: linear-gradient(180deg, rgba(26,26,38,0.96), rgba(18,18,26,0.98));
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-lg);
+  }
+  .lock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(93,191,245,0.12);
+    border: 1px solid rgba(93,191,245,0.22);
+    color: var(--blue);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .lock-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .lock-copy {
+    margin-top: 8px;
+    margin-bottom: 18px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .lock-note {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  .lock-feedback {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: rgba(20,20,30,0.9);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+  .lock-feedback.is-info {
+    color: var(--text-secondary);
+  }
+  .lock-feedback.is-error {
+    color: var(--red-light);
+    border-color: rgba(255,68,68,0.28);
+    background: rgba(184,0,0,0.08);
+  }
+  .lock-feedback.is-warning {
+    color: var(--orange);
+    border-color: rgba(232,155,67,0.26);
+    background: rgba(232,155,67,0.08);
+  }
+  .lock-countdown {
+    margin-top: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--yellow);
+  }
+  .lock-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .lock-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
   /* ─── Print Styles ─── */
   @media print {
     body {
@@ -691,6 +799,7 @@
     .cal-tooltip { display: none !important; }
     .summary-card { border-color: #2980b9 !important; }
     .health-meter { background: #eee !important; }
+    .lock-screen { display: none !important; }
   }
 
   @media (max-width: 640px) {
@@ -717,7 +826,32 @@
   }
 </style>
 </head>
-<body>
+<body class="lock-screen-active">
+
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-card fade-in">
+    <div class="lock-badge">Acceso protegido</div>
+    <div class="lock-title">Desbloquear RayCash</div>
+    <div class="lock-copy">Ingresa la contraseña para abrir la app en este dispositivo. El bloqueo progresivo se guarda localmente para funcionar tambien offline.</div>
+    <div class="field-group">
+      <label for="lockPasswordInput">Contraseña</label>
+      <input type="password" id="lockPasswordInput" placeholder="Ingresa tu contraseña" autocomplete="current-password">
+    </div>
+    <div class="toggle-row mt-16">
+      <label class="toggle">
+        <input type="checkbox" id="rememberDeviceToggle">
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Recordar este dispositivo</span>
+    </div>
+    <div class="lock-feedback is-info" id="lockStatusMessage" aria-live="polite">Ingresa la contraseña para continuar.</div>
+    <div class="lock-countdown hidden" id="lockCountdown" aria-live="polite"></div>
+    <div class="lock-actions">
+      <button class="btn btn-primary" id="unlockButton" type="button">Ingresar</button>
+    </div>
+    <div class="lock-note">La opcion de recordar solo guarda el estado de desbloqueo en este navegador.</div>
+  </div>
+</div>
 
 <!-- Thursday Income Modal -->
 <div class="modal-overlay hidden" id="thursdayModal">
@@ -738,7 +872,7 @@
   </div>
 </div>
 
-<div class="app-container">
+<div class="app-container is-obscured" id="appContainer" aria-hidden="true">
   <header class="header">
     <h1>RayCash</h1>
     <div class="subtitle">Proyeccion Financiera Personal (MXN)</div>
@@ -925,18 +1059,36 @@ const COPILOT_PRO_USD = 10.00;
 const USD_MXN_FALLBACK = 17.00;
 const USD_MXN_API_URL = 'https://open.er-api.com/v6/latest/USD';
 const RECURRING_PAYMENTS_STORAGE_KEY = 'raycash.recurringPayments.v1';
+const APP_PASSWORD_HASH = '80d47f7f407c8307cc29ccb803230c0b643a0cc39a0903f5648206b488ebd78f';
+const APP_LOCK_STORAGE_KEY = 'raycash.appLock.v1';
+const APP_LOCK_MAX_ATTEMPTS = 5;
+const APP_LOCK_PENALTIES_MS = [
+  60 * 1000,
+  5 * 60 * 1000,
+  60 * 60 * 1000,
+  24 * 60 * 60 * 1000,
+];
+const REMOVED_RECURRING_PAYMENT_IDS = new Set([
+  'bbva-1',
+  'bbva-16',
+  'sofacama-coppel',
+  'microondas-coppel',
+  'minecraft-realms',
+]);
+const MANAGED_RECURRING_PAYMENT_IDS = new Set([
+  'mercado-pago',
+  'lentes-mama',
+  'iphone-telcel',
+]);
 
 const DEFAULT_RECURRING_PAYMENTS = [
-  { id: 'bbva-1', name: "BBVA (1)", amount: 577.24, currency: 'MXN', frequency: 'monthly', day1: 1, payee: "BBVA", active: true },
-  { id: 'bbva-16', name: "BBVA (16)", amount: 577.24, currency: 'MXN', frequency: 'monthly', day1: 16, payee: "BBVA", active: true },
-  { id: 'mercado-pago', name: "Mercado Pago", amount: 545.33, currency: 'MXN', frequency: 'monthly', day1: 16, payee: "Mercado Pago", active: true },
+  { id: 'mercado-pago', name: "Mercado Pago", amount: 1507.11, currency: 'MXN', frequency: 'monthly', day1: 16, payee: "Mercado Pago", active: true },
   { id: 'icloud', name: "iCloud+", amount: 179.00, currency: 'MXN', frequency: 'monthly', day1: 8, payee: "Apple", active: true },
   { id: 'apple-music', name: "Apple Music", amount: 199.00, currency: 'MXN', frequency: 'monthly', day1: 10, payee: "Apple", active: true },
   { id: 'lentes-coppel', name: "Lentes (Coppel)", amount: 384.00, currency: 'MXN', frequency: 'monthly', day1: 22, payee: "Coppel", active: true },
-  { id: 'sofacama-coppel', name: "Sofacama (Coppel)", amount: 797.00, currency: 'MXN', frequency: 'monthly', day1: 17, payee: "Coppel", active: true },
-  { id: 'microondas-coppel', name: "Microondas (Coppel)", amount: 326.00, currency: 'MXN', frequency: 'monthly', day1: 27, payee: "Coppel", active: true },
+  { id: 'lentes-mama', name: "Lentes mamá", amount: 385.00, currency: 'MXN', frequency: 'monthly', day1: 21, payee: "Lentes mamá", active: true },
+  { id: 'iphone-telcel', name: "iPhone", amount: 2525.00, currency: 'MXN', frequency: 'monthly', day1: 23, payee: "Telcel", active: true },
   { id: 'prestamo-coppel', name: "Prestamo Coppel", amount: 2973.00, currency: 'MXN', frequency: 'monthly', day1: 13, payee: "Coppel", active: true },
-  { id: 'minecraft-realms', name: "Minecraft Realms", amount: MINECRAFT_REALMS_MONTO, currency: 'MXN', frequency: 'monthly', day1: 28, payee: "Microsoft", active: true },
   { id: 'copilot-pro', name: "Copilot Pro", amount: COPILOT_PRO_USD, currency: 'USD', frequency: 'monthly', day1: 28, payee: "Microsoft", active: true },
   { id: 'renta-padres', name: "Renta a padres", amount: 1771.00, currency: 'MXN', frequency: 'monthly', day1: 1, payee: "Familia", active: true, isProtected: true },
 ];
@@ -957,6 +1109,10 @@ let usdToMxnRate = USD_MXN_FALLBACK;
 let recurringPayments = [];
 let editingRecurringId = null;
 let projectionWeeks = WEEKS_AHEAD;
+let appLockState = null;
+let appUnlocked = false;
+let appLockCountdownTimer = null;
+let appUnlockInProgress = false;
 
 // ─── Date Helpers (using getTime() for robust comparison) ────────────────
 function dateOnly(d) {
@@ -997,6 +1153,305 @@ function dateInRange(d, start, end) { return stamp(d) >= stamp(start) && stamp(d
 
 function roundToCents(v) {
   return Math.round(v * 100) / 100;
+}
+
+async function hashPassword(password) {
+  if (!window.crypto || !window.crypto.subtle) {
+    throw new Error('Crypto Subtle API no disponible');
+  }
+
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function defaultAppLockState() {
+  return {
+    failedAttempts: 0,
+    unlockUntil: 0,
+    penaltyLevel: 0,
+    trustedDevice: false,
+    rememberedUnlock: false,
+  };
+}
+
+function normalizeAppLockState(raw) {
+  const safe = raw && typeof raw === 'object' ? raw : {};
+  return {
+    failedAttempts: Math.max(0, parseInt(safe.failedAttempts, 10) || 0),
+    unlockUntil: Math.max(0, parseInt(safe.unlockUntil, 10) || 0),
+    penaltyLevel: Math.max(0, parseInt(safe.penaltyLevel, 10) || 0),
+    trustedDevice: safe.trustedDevice === true,
+    rememberedUnlock: safe.rememberedUnlock === true,
+  };
+}
+
+function loadAppLockState() {
+  try {
+    return normalizeAppLockState(JSON.parse(localStorage.getItem(APP_LOCK_STORAGE_KEY) || 'null'));
+  } catch (err) {
+    console.warn('No se pudo leer el estado de bloqueo de la app.', err);
+    return defaultAppLockState();
+  }
+}
+
+function saveAppLockState() {
+  try {
+    localStorage.setItem(APP_LOCK_STORAGE_KEY, JSON.stringify(appLockState));
+  } catch (err) {
+    console.warn('No se pudo guardar el estado de bloqueo de la app.', err);
+  }
+}
+
+function getAppLockPenaltyDuration(level) {
+  if (level < APP_LOCK_PENALTIES_MS.length) return APP_LOCK_PENALTIES_MS[level];
+  const lastIndex = APP_LOCK_PENALTIES_MS.length - 1;
+  return APP_LOCK_PENALTIES_MS[lastIndex] * Math.pow(2, level - lastIndex);
+}
+
+function getAppLockRemainingMs() {
+  if (!appLockState) return 0;
+  return Math.max(0, appLockState.unlockUntil - Date.now());
+}
+
+function isAppLockActive() {
+  return getAppLockRemainingMs() > 0;
+}
+
+function formatLockRemainingTime(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const parts = [];
+
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if ((days === 0 && hours === 0) || parts.length === 0) parts.push(`${seconds}s`);
+
+  return parts.slice(0, 2).join(' ');
+}
+
+function clearAppLockCountdown() {
+  if (!appLockCountdownTimer) return;
+  clearInterval(appLockCountdownTimer);
+  appLockCountdownTimer = null;
+}
+
+function setLockStatusMessage(message, tone = 'info') {
+  const messageEl = document.getElementById('lockStatusMessage');
+  if (!messageEl) return;
+  messageEl.textContent = message;
+  messageEl.className = `lock-feedback is-${tone}`;
+}
+
+function updateLockCountdown() {
+  const countdownEl = document.getElementById('lockCountdown');
+  if (!countdownEl) return;
+
+  const remainingMs = getAppLockRemainingMs();
+  if (remainingMs <= 0) {
+    countdownEl.textContent = '';
+    countdownEl.classList.add('hidden');
+    clearAppLockCountdown();
+    renderAppLockState();
+    return;
+  }
+
+  countdownEl.textContent = `Bloqueo activo: ${formatLockRemainingTime(remainingMs)}`;
+  countdownEl.classList.remove('hidden');
+}
+
+function startAppLockCountdown() {
+  clearAppLockCountdown();
+  updateLockCountdown();
+  appLockCountdownTimer = setInterval(updateLockCountdown, 1000);
+}
+
+function updateAppVisibility(isUnlocked) {
+  const lockScreen = document.getElementById('lockScreen');
+  const appContainer = document.getElementById('appContainer');
+
+  if (!lockScreen || !appContainer) return;
+
+  if (isUnlocked) {
+    document.body.classList.remove('lock-screen-active');
+    lockScreen.classList.add('hidden');
+    appContainer.classList.remove('is-obscured');
+    appContainer.setAttribute('aria-hidden', 'false');
+    return;
+  }
+
+  document.body.classList.add('lock-screen-active');
+  lockScreen.classList.remove('hidden');
+  appContainer.classList.add('is-obscured');
+  appContainer.setAttribute('aria-hidden', 'true');
+}
+
+function resetAppLockStateAfterSuccess(rememberDevice) {
+  appLockState.failedAttempts = 0;
+  appLockState.unlockUntil = 0;
+  appLockState.penaltyLevel = 0;
+  appLockState.trustedDevice = rememberDevice;
+  appLockState.rememberedUnlock = rememberDevice;
+}
+
+function triggerAppLock() {
+  const durationMs = getAppLockPenaltyDuration(appLockState.penaltyLevel);
+  appLockState.unlockUntil = Date.now() + durationMs;
+  appLockState.penaltyLevel += 1;
+  appLockState.failedAttempts = APP_LOCK_MAX_ATTEMPTS;
+  appLockState.trustedDevice = false;
+  appLockState.rememberedUnlock = false;
+  saveAppLockState();
+  renderAppLockState();
+}
+
+async function handleUnlockAttempt() {
+  const input = document.getElementById('lockPasswordInput');
+  const button = document.getElementById('unlockButton');
+  const rememberToggle = document.getElementById('rememberDeviceToggle');
+  if (!input || !button || !rememberToggle) return;
+
+  if (appUnlockInProgress) return;
+
+  if (isAppLockActive()) {
+    renderAppLockState();
+    return;
+  }
+
+  const typedPassword = input.value;
+  if (!typedPassword) {
+    setLockStatusMessage('Escribe la contraseña para continuar.', 'error');
+    input.focus();
+    return;
+  }
+
+  appUnlockInProgress = true;
+  renderAppLockState();
+  let shouldRenderState = true;
+
+  try {
+    const hashedPassword = await hashPassword(typedPassword);
+    if (hashedPassword === APP_PASSWORD_HASH) {
+      resetAppLockStateAfterSuccess(rememberToggle.checked);
+      saveAppLockState();
+      appUnlocked = true;
+      input.value = '';
+      clearAppLockCountdown();
+      updateAppVisibility(true);
+      setLockStatusMessage('Ingresa la contraseña para continuar.', 'info');
+      return;
+    }
+
+    appUnlocked = false;
+    appLockState.trustedDevice = false;
+    appLockState.rememberedUnlock = false;
+    input.value = '';
+
+    if (appLockState.failedAttempts >= APP_LOCK_MAX_ATTEMPTS) {
+      triggerAppLock();
+      return;
+    }
+
+    appLockState.failedAttempts += 1;
+    if (appLockState.failedAttempts >= APP_LOCK_MAX_ATTEMPTS) {
+      triggerAppLock();
+      return;
+    }
+
+    saveAppLockState();
+  } catch (error) {
+    console.warn('No se pudo hashear la contraseña.', error);
+    shouldRenderState = false;
+    setLockStatusMessage('No se pudo verificar la contraseña en este navegador.', 'error');
+  } finally {
+    appUnlockInProgress = false;
+    if (!appUnlocked && shouldRenderState) {
+      renderAppLockState();
+      input.focus();
+    } else if (!appUnlocked) {
+      input.disabled = false;
+      button.disabled = false;
+      rememberToggle.disabled = false;
+      input.focus();
+    }
+  }
+}
+
+function renderAppLockState() {
+  const input = document.getElementById('lockPasswordInput');
+  const button = document.getElementById('unlockButton');
+  const rememberToggle = document.getElementById('rememberDeviceToggle');
+  const countdownEl = document.getElementById('lockCountdown');
+  if (!input || !button || !rememberToggle || !countdownEl) return;
+
+  const rememberedUnlock = appLockState.trustedDevice && appLockState.rememberedUnlock;
+  if (appUnlocked || rememberedUnlock) {
+    clearAppLockCountdown();
+    updateAppVisibility(true);
+    return;
+  }
+
+  updateAppVisibility(false);
+  const isLocked = isAppLockActive();
+  const controlsDisabled = isLocked || appUnlockInProgress;
+  input.disabled = controlsDisabled;
+  button.disabled = controlsDisabled;
+  rememberToggle.disabled = controlsDisabled;
+
+  if (appUnlockInProgress) {
+    countdownEl.textContent = '';
+    countdownEl.classList.add('hidden');
+    setLockStatusMessage('Verificando contraseña...', 'info');
+    return;
+  }
+
+  if (isLocked) {
+    setLockStatusMessage(`Demasiados intentos. Intenta de nuevo en ${formatLockRemainingTime(getAppLockRemainingMs())}.`, 'error');
+    startAppLockCountdown();
+    return;
+  }
+
+  clearAppLockCountdown();
+  countdownEl.textContent = '';
+  countdownEl.classList.add('hidden');
+
+  if (appLockState.failedAttempts >= APP_LOCK_MAX_ATTEMPTS && appLockState.penaltyLevel > 0) {
+    setLockStatusMessage('Ya agotaste el limite anterior. La siguiente contraseña incorrecta activara un bloqueo mayor.', 'warning');
+  } else if (appLockState.failedAttempts > 0) {
+    const remainingAttempts = APP_LOCK_MAX_ATTEMPTS - appLockState.failedAttempts;
+    setLockStatusMessage(`Contraseña incorrecta. Quedan ${remainingAttempts} intento${remainingAttempts === 1 ? '' : 's'} antes del bloqueo.`, 'error');
+  } else {
+    setLockStatusMessage('Ingresa la contraseña para continuar.', 'info');
+  }
+
+  requestAnimationFrame(() => input.focus());
+}
+
+function initAppLock() {
+  appLockState = loadAppLockState();
+
+  const input = document.getElementById('lockPasswordInput');
+  const button = document.getElementById('unlockButton');
+  if (!input || !button) return;
+
+  button.addEventListener('click', () => {
+    void handleUnlockAttempt();
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      void handleUnlockAttempt();
+    }
+  });
+
+  appUnlocked = appLockState.trustedDevice && appLockState.rememberedUnlock;
+  renderAppLockState();
 }
 
 function sanitizeWeeks(value) {
@@ -1121,6 +1576,29 @@ function ensureProtectedRecurring() {
   }
 }
 
+function syncRecurringPaymentsWithDefaults() {
+  const defaultMap = new Map(cloneDefaultRecurringPayments().map(payment => [payment.id, payment]));
+
+  recurringPayments = recurringPayments.filter(payment => !REMOVED_RECURRING_PAYMENT_IDS.has(payment.id));
+
+  for (const managedId of MANAGED_RECURRING_PAYMENT_IDS) {
+    const defaultPayment = defaultMap.get(managedId);
+    if (!defaultPayment) continue;
+
+    const existingIndex = recurringPayments.findIndex(payment => payment.id === managedId);
+    if (existingIndex === -1) {
+      recurringPayments.push({ ...defaultPayment });
+      continue;
+    }
+
+    const existingPayment = recurringPayments[existingIndex];
+    recurringPayments[existingIndex] = {
+      ...defaultPayment,
+      active: existingPayment.active !== false,
+    };
+  }
+}
+
 function loadRecurringPayments() {
   let parsed = null;
   try {
@@ -1149,6 +1627,7 @@ function loadRecurringPayments() {
     recurringPayments = cloneDefaultRecurringPayments();
   }
 
+  syncRecurringPaymentsWithDefaults();
   ensureProtectedRecurring();
   saveRecurringPayments();
 }
@@ -2796,6 +3275,7 @@ async function registerServiceWorker() {
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
+  initAppLock();
   registerServiceWorker();
 });
 </script>

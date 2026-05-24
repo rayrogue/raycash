@@ -237,6 +237,7 @@
   .badge-pago { background: rgba(242,237,109,0.12); color: var(--yellow); }
   .badge-ingreso { background: rgba(93,191,245,0.12); color: var(--blue); }
   .badge-vales { background: rgba(232,155,67,0.12); color: var(--orange); }
+    .badge-tdc { background: rgba(55,74,240,0.14); color: var(--deep-blue); }
 
   .event-amount {
     font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
@@ -246,6 +247,7 @@
   .amount-payment { color: var(--yellow); }
   .amount-income { color: var(--blue); }
   .amount-vales { color: var(--orange); }
+    .amount-tdc { color: var(--deep-blue); }
   .amount-positive { color: var(--green); }
   .amount-negative { color: var(--red-light); }
   .amount-total { color: var(--purple); }
@@ -392,6 +394,7 @@
   .cal-dot.ingreso { background: var(--blue); }
   .cal-dot.vales { background: var(--orange); }
   .cal-dot.especial { background: var(--purple); }
+    .cal-dot.tdc { background: var(--deep-blue); }
 
   .cal-tooltip {
     display: none; position: absolute; z-index: 100;
@@ -554,6 +557,10 @@
     background: rgba(255,68,68,0.15); color: var(--red-light);
     font-weight: 600; white-space: nowrap;
   }
+    .week-expense-warning.covered {
+      background: rgba(242,237,109,0.16);
+      color: var(--yellow);
+    }
 
   /* Summary */
   .summary-grid {
@@ -771,6 +778,7 @@
     .amount-positive { color: #27ae60 !important; }
     .amount-negative { color: #c0392b !important; }
     .amount-vales { color: #d35400 !important; }
+    .amount-tdc { color: #374af0 !important; }
     .amount-total { color: #8e44ad !important; }
     .text-muted, .week-range, .event-date, .health-card-label { color: #666 !important; }
     .chart-canvas-wrap { height: 250px; }
@@ -796,6 +804,7 @@
     .cal-dot.ingreso::before { color: #2980b9 !important; }
     .cal-dot.vales::before { color: #d35400 !important; }
     .cal-dot.especial::before { color: #8e44ad !important; }
+    .cal-dot.tdc::before { color: #374af0 !important; }
     .cal-tooltip { display: none !important; }
     .summary-card { border-color: #2980b9 !important; }
     .health-meter { background: #eee !important; }
@@ -938,7 +947,7 @@
 
       <div class="recurring-manager">
         <div class="recurring-manager-title">Pagos recurrentes</div>
-        <div class="recurring-manager-note">Puedes editar fechas/frecuencias, pausar o eliminar pagos recurrentes. Se excluyen Vales y Renta a padres. Los cambios se guardan automaticamente en este navegador.</div>
+        <div class="recurring-manager-note">Puedes editar fechas, frecuencias y pausar pagos recurrentes. Los cobros a TDC se muestran aparte y no afectan el flujo de efectivo. Los cambios se guardan automaticamente en este navegador.</div>
 
         <div class="recurring-list" id="recurringList"></div>
 
@@ -1074,23 +1083,31 @@ const REMOVED_RECURRING_PAYMENT_IDS = new Set([
   'sofacama-coppel',
   'microondas-coppel',
   'minecraft-realms',
-]);
-const MANAGED_RECURRING_PAYMENT_IDS = new Set([
-  'mercado-pago',
-  'lentes-mama',
   'iphone-telcel',
+]);
+const CREDIT_CARD_RECURRING_PAYMENT_IDS = new Set([
+  'icloud',
+  'apple-music',
+  'copilot-pro',
+]);
+const REQUIRED_RECURRING_PAYMENT_IDS = new Set([
+  'mercado-pago',
+  'icloud',
+  'apple-music',
+  'prestamo-coppel',
+  'copilot-pro',
+  'renta-padres',
 ]);
 
 const DEFAULT_RECURRING_PAYMENTS = [
-  { id: 'mercado-pago', name: "Mercado Pago", amount: 1507.11, currency: 'MXN', frequency: 'monthly', day1: 16, payee: "Mercado Pago", active: true },
-  { id: 'icloud', name: "iCloud+", amount: 179.00, currency: 'MXN', frequency: 'monthly', day1: 8, payee: "Apple", active: true },
-  { id: 'apple-music', name: "Apple Music", amount: 199.00, currency: 'MXN', frequency: 'monthly', day1: 10, payee: "Apple", active: true },
+  { id: 'mercado-pago', name: "Mercado Pago", amount: 0.00, currency: 'MXN', frequency: 'monthly', day1: 16, payee: "Mercado Pago", active: false },
+  { id: 'icloud', name: "iCloud+", amount: 179.00, currency: 'MXN', frequency: 'monthly', day1: 8, payee: "Apple", active: true, paymentMode: 'credit' },
+  { id: 'apple-music', name: "Apple Music", amount: 199.00, currency: 'MXN', frequency: 'monthly', day1: 10, payee: "Apple", active: true, paymentMode: 'credit' },
   { id: 'lentes-coppel', name: "Lentes (Coppel)", amount: 384.00, currency: 'MXN', frequency: 'monthly', day1: 22, payee: "Coppel", active: true },
   { id: 'lentes-mama', name: "Lentes mamá", amount: 385.00, currency: 'MXN', frequency: 'monthly', day1: 21, payee: "Lentes mamá", active: true },
-  { id: 'iphone-telcel', name: "iPhone", amount: 2525.00, currency: 'MXN', frequency: 'monthly', day1: 23, payee: "Telcel", active: true },
-  { id: 'prestamo-coppel', name: "Prestamo Coppel", amount: 2973.00, currency: 'MXN', frequency: 'monthly', day1: 13, payee: "Coppel", active: true },
-  { id: 'copilot-pro', name: "Copilot Pro", amount: COPILOT_PRO_USD, currency: 'USD', frequency: 'monthly', day1: 28, payee: "Microsoft", active: true },
-  { id: 'renta-padres', name: "Renta a padres", amount: 1771.00, currency: 'MXN', frequency: 'monthly', day1: 1, payee: "Familia", active: true, isProtected: true },
+  { id: 'prestamo-coppel', name: "Prestamo Coppel", amount: 4720.00, currency: 'MXN', frequency: 'monthly', day1: 19, payee: "Coppel", active: true },
+  { id: 'copilot-pro', name: "Copilot Pro", amount: COPILOT_PRO_USD, currency: 'USD', frequency: 'monthly', day1: 28, payee: "Microsoft", active: true, paymentMode: 'credit' },
+  { id: 'renta-padres', name: "Renta a padres", amount: 1771.00, currency: 'MXN', frequency: 'monthly', day1: 1, payee: "Familia", active: true, allowRemove: false },
 ];
 
 const SPECIAL_THURSDAYS = [
@@ -1524,10 +1541,11 @@ function normalizeRecurringPayment(raw) {
     : 'monthly';
   const currency = raw.currency === 'USD' ? 'USD' : 'MXN';
   const amount = roundToCents(Number(raw.amount));
+  const isActive = raw.active !== false;
   const name = String(raw.name || '').trim();
   const payee = String(raw.payee || raw.name || 'Recurrente').trim();
 
-  if (!name || !Number.isFinite(amount) || amount <= 0) return null;
+  if (!name || !Number.isFinite(amount) || amount < 0 || (amount === 0 && isActive)) return null;
 
   let day1 = parseInt(raw.day1 ?? raw.day, 10);
   if (!Number.isInteger(day1) || day1 < 1 || day1 > 31) day1 = 1;
@@ -1551,7 +1569,9 @@ function normalizeRecurringPayment(raw) {
     day1,
     day2: frequency === 'twiceMonthly' ? day2 : null,
     startDate,
-    active: raw.active !== false,
+    active: isActive,
+    paymentMode: raw.paymentMode === 'credit' ? 'credit' : 'cash',
+    allowRemove: raw.allowRemove !== false,
     isProtected: raw.isProtected === true,
   };
 }
@@ -1579,23 +1599,56 @@ function ensureProtectedRecurring() {
 function syncRecurringPaymentsWithDefaults() {
   const defaultMap = new Map(cloneDefaultRecurringPayments().map(payment => [payment.id, payment]));
 
-  recurringPayments = recurringPayments.filter(payment => !REMOVED_RECURRING_PAYMENT_IDS.has(payment.id));
+  recurringPayments = recurringPayments
+    .filter(payment => !REMOVED_RECURRING_PAYMENT_IDS.has(payment.id))
+    .map(payment => {
+      const defaultPayment = defaultMap.get(payment.id);
 
-  for (const managedId of MANAGED_RECURRING_PAYMENT_IDS) {
-    const defaultPayment = defaultMap.get(managedId);
-    if (!defaultPayment) continue;
+      if (payment.id === 'mercado-pago' && defaultPayment) {
+        return { ...defaultPayment };
+      }
 
-    const existingIndex = recurringPayments.findIndex(payment => payment.id === managedId);
-    if (existingIndex === -1) {
-      recurringPayments.push({ ...defaultPayment });
-      continue;
+      if (payment.id === 'prestamo-coppel' && defaultPayment) {
+        return {
+          ...payment,
+          name: defaultPayment.name,
+          payee: defaultPayment.payee,
+          amount: defaultPayment.amount,
+          currency: defaultPayment.currency,
+          frequency: defaultPayment.frequency,
+          day1: defaultPayment.day1,
+          day2: defaultPayment.day2 ?? null,
+          startDate: defaultPayment.startDate ?? null,
+        };
+      }
+
+      if (payment.id === 'renta-padres') {
+        return {
+          ...payment,
+          isProtected: false,
+          allowRemove: false,
+        };
+      }
+
+      if (CREDIT_CARD_RECURRING_PAYMENT_IDS.has(payment.id)) {
+        return {
+          ...payment,
+          paymentMode: 'credit',
+        };
+      }
+
+      return payment;
+    })
+    .map(normalizeRecurringPayment)
+    .filter(Boolean);
+
+  for (const requiredId of REQUIRED_RECURRING_PAYMENT_IDS) {
+    if (recurringPayments.some(payment => payment.id === requiredId)) continue;
+
+    const defaultPayment = normalizeRecurringPayment(defaultMap.get(requiredId));
+    if (defaultPayment) {
+      recurringPayments.push(defaultPayment);
     }
-
-    const existingPayment = recurringPayments[existingIndex];
-    recurringPayments[existingIndex] = {
-      ...defaultPayment,
-      active: existingPayment.active !== false,
-    };
   }
 }
 
@@ -1726,7 +1779,8 @@ function buildRecurringEventsForPayment(payment, start, end) {
       name: recurringName,
       amount: recurringAmount,
       payee: recurringPayee,
-      type: 'pago',
+      type: payment.paymentMode === 'credit' ? 'tdc' : 'pago',
+      paymentMode: payment.paymentMode === 'credit' ? 'credit' : 'cash',
       recurringId: payment.id,
     });
   };
@@ -1844,6 +1898,7 @@ function runProjectionCalc(startDate, weeks, startingCash, paidIndices, autoVale
     }
 
     const paymentsInWeek = [];
+    const cardChargesInWeek = [];
     let valesInWeek = 0;
     let spotifyInWeek = 0;
     let extraIncomeInWeek = [];
@@ -1868,14 +1923,21 @@ function runProjectionCalc(startDate, weeks, startingCash, paidIndices, autoVale
           }
         } else {
           if (!isPaid) {
-            paymentsInWeek.push({
+            const paymentRecord = {
               date: ev.date,
               name: ev.name,
               payee: ev.payee,
               amount: ev.amount,
               originalAmount: ev.amount,
               appliedVales: 0,
-            });
+              paymentMode: ev.paymentMode === 'credit' ? 'credit' : 'cash',
+            };
+
+            if (paymentRecord.paymentMode === 'credit') {
+              cardChargesInWeek.push(paymentRecord);
+            } else {
+              paymentsInWeek.push(paymentRecord);
+            }
           }
         }
         eventIndex++;
@@ -1898,8 +1960,11 @@ function runProjectionCalc(startDate, weeks, startingCash, paidIndices, autoVale
 
     const totalExtraIncome = extraIncomeInWeek.reduce((s, e) => s + e.amount, 0);
     const totalPayments = paymentsInWeek.reduce((s, p) => s + p.amount, 0);
-    const netChange = weekIncome + totalExtraIncome - totalPayments;
+    const totalCardCharges = cardChargesInWeek.reduce((s, p) => s + p.amount, 0);
+    const cashIncomeThisWeek = weekIncome + totalExtraIncome;
+    const netChange = cashIncomeThisWeek - totalPayments;
     const endCash = cash + netChange;
+    const hasExpenseOverIncome = totalPayments > cashIncomeThisWeek;
 
     weeksList.push({
       weekStart: ws,
@@ -1911,12 +1976,17 @@ function runProjectionCalc(startDate, weeks, startingCash, paidIndices, autoVale
       vales: valesInWeek,
       valesPool: valesPool,
       payments: paymentsInWeek,
+      cardCharges: cardChargesInWeek,
       totalPayments: totalPayments,
+      totalCardCharges: totalCardCharges,
       startCash: cash,
       endCash: endCash,
       extraForCard: Math.max(0, endCash),
       smartTDC: 0,
       reserveForFuture: 0,
+      hasExpenseOverIncome,
+      hasCoveredExpensePressure: hasExpenseOverIncome && endCash >= 0,
+      hasRiskShortfall: endCash < 0,
     });
 
     cash = endCash;
@@ -2038,8 +2108,7 @@ function computeHealthScore(proj) {
   const totalIncome = proj.reduce((s, w) => s + w.income + w.totalExtraIncome + w.vales, 0);
   const totalExpenses = proj.reduce((s, w) => s + w.totalPayments, 0);
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
-  // Risk weeks: weeks where expenses exceed income (not counting starting balance)
-  const riskWeeks = proj.filter(w => w.totalPayments > (w.income + w.totalExtraIncome)).length;
+  const riskWeeks = proj.filter(w => w.hasRiskShortfall).length;
   const lastBalance = proj[proj.length - 1].endCash;
   const firstBalance = proj[0].endCash;
   const trend = lastBalance - firstBalance;
@@ -2097,7 +2166,7 @@ function renderHealthIndicators(proj) {
     <div class="health-card">
       <div class="health-card-label">Semanas en Riesgo</div>
       <div class="health-stat" style="color:${h.riskWeeks === 0 ? 'var(--green)' : 'var(--red-light)'}">${h.riskWeeks} / ${proj.length}</div>
-      <div class="health-stat-sub">${h.riskWeeks === 0 ? 'Gastos no superan ingresos' : h.riskWeeks === 1 ? '1 semana con gastos mayores a ingresos' : h.riskWeeks + ' semanas con gastos mayores a ingresos'}</div>
+      <div class="health-stat-sub">${h.riskWeeks === 0 ? 'Sin deficit de caja proyectado' : h.riskWeeks === 1 ? '1 semana con saldo insuficiente' : h.riskWeeks + ' semanas con saldo insuficiente'}</div>
     </div>
     <div class="health-card">
       <div class="health-card-label">Tendencia</div>
@@ -2119,7 +2188,8 @@ function buildCalendar() {
   allEvents.forEach(ev => {
     const key = formatDate(ev.date);
     if (!eventMap[key]) eventMap[key] = [];
-    const evType = ev.payee === 'Vales' ? 'vales'
+    const evType = ev.paymentMode === 'credit' ? 'tdc'
+      : ev.payee === 'Vales' ? 'vales'
       : ev.payee === 'Especial' ? 'especial'
       : (ev.amount < 0 || ev.payee === 'Ingresos') ? 'ingreso' : 'pago';
     eventMap[key].push({ name: ev.name, type: evType, amount: ev.amount });
@@ -2208,9 +2278,12 @@ function buildCalendar() {
           item.className = 'cal-tooltip-item';
           const color = ev.type === 'vales' ? 'var(--orange)'
             : ev.type === 'ingreso' ? 'var(--blue)'
+            : ev.type === 'tdc' ? 'var(--deep-blue)'
             : ev.type === 'especial' ? 'var(--purple)' : 'var(--yellow)';
-          const sign = ev.amount < 0 ? '+' : '-';
-          item.innerHTML = `<span style="color:${color}">${ev.name}</span> <span class="mono" style="color:${color}">${sign}$${formatMoney(ev.amount)}</span>`;
+          const amountLabel = ev.type === 'tdc'
+            ? `TDC $${formatMoney(ev.amount)}`
+            : `${ev.amount < 0 ? '+' : '-'}$${formatMoney(ev.amount)}`;
+          item.innerHTML = `<span style="color:${color}">${ev.name}</span> <span class="mono" style="color:${color}">${amountLabel}</span>`;
           tooltip.appendChild(item);
         });
         cell.appendChild(tooltip);
@@ -2589,10 +2662,12 @@ function renderEventsList() {
   container.innerHTML = '';
 
   allEvents.forEach((ev, i) => {
+    const isCardCharge = ev.paymentMode === 'credit' || ev.type === 'tdc';
     const isIncome = ev.payee === "Vales" || ev.payee === "Ingresos" || ev.amount < 0;
-    const typeClass = ev.payee === "Vales" ? 'badge-vales' : isIncome ? 'badge-ingreso' : 'badge-pago';
-    const typeLabel = ev.payee === "Vales" ? 'Vales' : isIncome ? 'Ingreso' : 'Pago';
-    const amountClass = ev.payee === "Vales" ? 'amount-vales' : isIncome ? 'amount-income' : 'amount-payment';
+    const typeClass = ev.payee === "Vales" ? 'badge-vales' : isCardCharge ? 'badge-tdc' : isIncome ? 'badge-ingreso' : 'badge-pago';
+    const typeLabel = ev.payee === "Vales" ? 'Vales' : isCardCharge ? 'Cobro a TDC' : isIncome ? 'Ingreso' : 'Pago';
+    const amountClass = ev.payee === "Vales" ? 'amount-vales' : isCardCharge ? 'amount-tdc' : isIncome ? 'amount-income' : 'amount-payment';
+    const amountLabel = isCardCharge ? `TDC $${formatMoney(ev.amount)}` : `$${formatMoney(ev.amount)}`;
     const isToday = datesEqual(ev.date, today);
 
     const row = document.createElement('div');
@@ -2603,9 +2678,9 @@ function renderEventsList() {
       <input type="checkbox" class="event-checkbox" data-index="${i}" title="Marcar como pagado/recibido">
       <span class="event-index">${i}</span>
       <span class="event-date">${formatDate(ev.date)}${isToday ? ' <span style="color:var(--deep-blue);font-size:0.65rem;">HOY</span>' : ''}</span>
-      <span class="event-name" style="color: ${ev.payee === 'Vales' ? 'var(--orange)' : isIncome ? 'var(--blue)' : 'var(--yellow)'}">${ev.name}</span>
+      <span class="event-name" style="color: ${ev.payee === 'Vales' ? 'var(--orange)' : isCardCharge ? 'var(--deep-blue)' : isIncome ? 'var(--blue)' : 'var(--yellow)'}">${ev.name}</span>
       <span class="event-type-badge ${typeClass}">${typeLabel}</span>
-      <span class="event-amount ${amountClass}">$${formatMoney(ev.amount)}</span>
+      <span class="event-amount ${amountClass}">${amountLabel}</span>
     `;
 
     const checkbox = row.querySelector('.event-checkbox');
@@ -2748,6 +2823,8 @@ function saveRecurringPayment() {
     currency,
     frequency,
     active: existing ? existing.active !== false : true,
+    paymentMode: existing ? (existing.paymentMode === 'credit' ? 'credit' : 'cash') : 'cash',
+    allowRemove: existing ? existing.allowRemove !== false : true,
     isProtected: existing ? existing.isProtected === true : false,
   };
 
@@ -2804,6 +2881,10 @@ function removeRecurringPayment(id) {
   if (!payment) return;
   if (payment.isProtected) {
     alert('Este pago recurrente es fijo y no se puede eliminar.');
+    return;
+  }
+  if (payment.allowRemove === false) {
+    alert('Este pago recurrente no se puede eliminar.');
     return;
   }
 
@@ -2864,6 +2945,13 @@ function renderRecurringPaymentsList() {
       head.appendChild(paused);
     }
 
+    if (payment.paymentMode === 'credit') {
+      const tdc = document.createElement('span');
+      tdc.className = 'badge-tdc';
+      tdc.textContent = 'TDC';
+      head.appendChild(tdc);
+    }
+
     const meta = document.createElement('div');
     meta.className = 'recurring-item-meta';
     const amountText = payment.currency === 'USD'
@@ -2873,7 +2961,8 @@ function renderRecurringPaymentsList() {
     const nextText = payment.active === false
       ? 'Pausado'
       : (nextDate ? `Proximo: ${formatDate(nextDate)}` : 'Sin proxima fecha en rango');
-    meta.textContent = `${getRecurringFrequencyLabel(payment.frequency)} (${getRecurringScheduleLabel(payment)}) • ${amountText} • ${nextText}`;
+    const chargeText = payment.paymentMode === 'credit' ? ' • Cobro a TDC' : '';
+    meta.textContent = `${getRecurringFrequencyLabel(payment.frequency)} (${getRecurringScheduleLabel(payment)}) • ${amountText}${chargeText} • ${nextText}`;
 
     main.appendChild(head);
     main.appendChild(meta);
@@ -2892,14 +2981,16 @@ function renderRecurringPaymentsList() {
       pauseBtn.textContent = payment.active === false ? 'Activar' : 'Pausar';
       pauseBtn.onclick = () => toggleRecurringActive(payment.id);
 
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'btn btn-secondary btn-sm';
-      removeBtn.textContent = 'Eliminar';
-      removeBtn.onclick = () => removeRecurringPayment(payment.id);
-
       actions.appendChild(editBtn);
       actions.appendChild(pauseBtn);
-      actions.appendChild(removeBtn);
+
+      if (payment.allowRemove !== false) {
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-secondary btn-sm';
+        removeBtn.textContent = 'Eliminar';
+        removeBtn.onclick = () => removeRecurringPayment(payment.id);
+        actions.appendChild(removeBtn);
+      }
     }
 
     row.appendChild(main);
@@ -3008,7 +3099,7 @@ function renderProjection(proj) {
   proj.forEach((w, i) => {
     const card = document.createElement('div');
     card.className = 'week-card fade-in';
-    if (w.endCash < 0) card.classList.add('week-danger');
+    if (w.hasRiskShortfall) card.classList.add('week-danger');
     card.style.animationDelay = `${i * 0.06}s`;
 
     const balColor = w.endCash >= 0 ? 'amount-positive' : 'amount-negative';
@@ -3018,11 +3109,11 @@ function renderProjection(proj) {
     const totalIncome = w.income + w.totalExtraIncome;
 
     // Alert badges
-    const alertBadge = w.endCash < 0
+    const alertBadge = w.hasRiskShortfall
       ? `<span class="week-alert-badge">Saldo negativo</span>`
       : '';
-    const expenseWarning = w.totalPayments > totalIncome
-      ? `<span class="week-expense-warning">&#9888; Gastos superan ingresos</span>`
+    const expenseWarning = w.hasExpenseOverIncome
+      ? `<span class="week-expense-warning${w.hasCoveredExpensePressure ? ' covered' : ''}">&#9888; Gastos superan ingresos</span>`
       : '';
 
     // ─── RIGHT COLUMN: Details ───
@@ -3055,6 +3146,17 @@ function renderProjection(proj) {
           <div class="payment-item">
             <span class="payment-item-name">${p.name} <span class="payment-item-date">${formatDateShort(p.date)}</span> ${valesNote}</span>
             <span class="week-row-value amount-payment">-$${formatMoney(p.amount)}</span>
+          </div>`;
+      });
+    }
+
+    let cardChargesDetailHTML = '';
+    if (w.cardCharges.length > 0) {
+      w.cardCharges.forEach(p => {
+        cardChargesDetailHTML += `
+          <div class="payment-item">
+            <span class="payment-item-name" style="color:var(--deep-blue)">${p.name} <span class="payment-item-date">${formatDateShort(p.date)}</span></span>
+            <span class="week-row-value amount-tdc">TDC $${formatMoney(p.amount)}</span>
           </div>`;
       });
     }
@@ -3113,6 +3215,10 @@ function renderProjection(proj) {
             <span class="week-row-label">Pagos totales</span>
             <span class="week-row-value amount-total">-$${formatMoney(w.totalPayments)}</span>
           </div>
+          ${w.totalCardCharges > 0 ? `<div class="week-row">
+            <span class="week-row-label">Cobros a TDC</span>
+            <span class="week-row-value amount-tdc">TDC $${formatMoney(w.totalCardCharges)}</span>
+          </div>` : ''}
           ${w.valesPool > 0 ? `<div class="week-row">
             <span class="week-row-label">Vales en pool</span>
             <span class="week-row-value amount-vales">$${formatMoney(w.valesPool)}</span>
@@ -3132,6 +3238,11 @@ function renderProjection(proj) {
             <div class="detail-section-label" style="color:var(--yellow)">Pagos</div>
             ${paymentsDetailHTML}
           ` : ''}
+          ${cardChargesDetailHTML ? `
+            <hr class="week-divider">
+            <div class="detail-section-label" style="color:var(--deep-blue)">Cobros a TDC</div>
+            ${cardChargesDetailHTML}
+          ` : ''}
           ${tdcHTML}
         </div>
       </div>
@@ -3147,6 +3258,7 @@ function renderSummary(proj) {
   const weeksCount = proj.length;
   const totalIncome = proj.reduce((s, w) => s + w.income + w.totalExtraIncome + w.vales, 0);
   const totalExpenses = proj.reduce((s, w) => s + w.totalPayments, 0);
+  const totalCardCharges = proj.reduce((s, w) => s + w.totalCardCharges, 0);
   const summaryColor = last.endCash >= 0 ? 'amount-positive' : 'amount-negative';
   const totalSmartTDC = proj.reduce((s, w) => s + w.smartTDC, 0);
 
@@ -3156,6 +3268,7 @@ function renderSummary(proj) {
       <div class="summary-amount ${summaryColor}">${last.endCash >= 0 ? '+' : '-'}$${formatMoney(last.endCash)}</div>
       <div class="summary-note">
         Los vales aparecen por separado y solo se aplican a Coppel si esta activado.<br>
+        Los cobros a TDC se muestran aparte y no impactan el flujo de efectivo.<br>
         La TDC inteligente reserva fondos para cubrir semanas futuras con deficit.
       </div>
     </div>
@@ -3169,6 +3282,10 @@ function renderSummary(proj) {
           <div class="summary-label">Total egresos (${weeksText(weeksCount)})</div>
           <div class="summary-amount small amount-payment">-$${formatMoney(totalExpenses)}</div>
         </div>
+        ${totalCardCharges > 0 ? `<div>
+          <div class="summary-label">Cobros a TDC (${weeksText(weeksCount)})</div>
+          <div class="summary-amount small amount-tdc">TDC $${formatMoney(totalCardCharges)}</div>
+        </div>` : ''}
         <div>
           <div class="summary-label">Flujo neto</div>
           <div class="summary-amount small ${totalIncome - totalExpenses >= 0 ? 'amount-positive' : 'amount-negative'}">${totalIncome - totalExpenses >= 0 ? '+' : '-'}$${formatMoney(totalIncome - totalExpenses)}</div>
